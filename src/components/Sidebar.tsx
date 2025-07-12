@@ -1,25 +1,28 @@
 import { Home, CheckSquare, Calendar, Users, BarChart3, Settings, FolderOpen, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Project } from "@/types/task";
+import { Project, Task } from "@/types/task";
 
 interface SidebarProps {
   projects: Project[];
+  tasks: Task[];
   activeView: string;
   onViewChange: (view: string) => void;
   onCreateProject?: () => void;
+  onSettingsClick?: () => void;
 }
 
-const navigationItems = [
+const getNavigationItems = (taskCount: number) => [
   { id: 'dashboard', label: 'Dashboard', icon: Home },
-  { id: 'tasks', label: 'All Tasks', icon: CheckSquare, count: 12 },
+  { id: 'tasks', label: 'All Tasks', icon: CheckSquare, count: taskCount },
   { id: 'calendar', label: 'Calendar', icon: Calendar },
   { id: 'team', label: 'Team', icon: Users },
   { id: 'projects', label: 'Projects', icon: FolderOpen },
   { id: 'reports', label: 'Reports', icon: BarChart3 },
 ];
 
-export function Sidebar({ projects, activeView, onViewChange, onCreateProject }: SidebarProps) {
+export function Sidebar({ projects, tasks, activeView, onViewChange, onCreateProject, onSettingsClick }: SidebarProps) {
+  const navigationItems = getNavigationItems(tasks.length);
   return (
     <aside className="w-64 border-r bg-card h-full">
       <div className="p-4">
@@ -74,7 +77,7 @@ export function Sidebar({ projects, activeView, onViewChange, onCreateProject }:
         </div>
 
         <div className="absolute bottom-4 left-4 right-4">
-          <Button variant="ghost" className="w-full justify-start">
+          <Button variant="ghost" className="w-full justify-start" onClick={onSettingsClick}>
             <Settings className="h-4 w-4 mr-3" />
             Settings
           </Button>

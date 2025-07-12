@@ -45,6 +45,7 @@ const Index = () => {
     <>
       <AppLayout
         projects={projects}
+        tasks={tasks}
         activeView={activeView}
         onViewChange={handleViewChange}
         onCreateProject={handleCreateProject}

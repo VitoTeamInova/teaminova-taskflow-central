@@ -2,13 +2,16 @@ import { useState } from "react";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { mockTasks } from "@/data/mockData";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Task } from "@/types/task";
-import { format, isSameDay } from "date-fns";
+import { format, isSameDay, addMonths, subMonths, startOfMonth, endOfMonth } from "date-fns";
+import { useAppData } from "@/hooks/useAppData";
 
 const Calendar = () => {
   const [date, setDate] = useState<Date | undefined>(new Date());
-  const [tasks] = useState<Task[]>(mockTasks);
+  const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
+  const { tasks, loading } = useAppData();
 
   // Get tasks for selected date
   const getTasksForDate = (selectedDate: Date) => {
@@ -59,6 +62,24 @@ const Calendar = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background p-6">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold">Calendar View</h1>
+          <p className="text-muted-foreground">Loading calendar data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const previousMonth = subMonths(currentMonth, 1);
+  const nextMonth = addMonths(currentMonth, 1);
+
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    setCurrentMonth(direction === 'prev' ? previousMonth : nextMonth);
+  };
+
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="mb-6">
@@ -66,30 +87,105 @@ const Calendar = () => {
         <p className="text-muted-foreground">View tasks by their due dates and completion dates</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Calendar */}
-        <div className="lg:col-span-2">
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+        {/* Three Month Calendar View */}
+        <div className="xl:col-span-3">
           <Card className="bg-card/50 backdrop-blur">
             <CardHeader>
-              <CardTitle>Task Calendar</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>Task Calendar</CardTitle>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigateMonth('prev')}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigateMonth('next')}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
             </CardHeader>
-            <CardContent className="flex justify-center">
-              <CalendarComponent
-                mode="single"
-                selected={date}
-                onSelect={setDate}
-                className="rounded-md border bg-background/50 p-3 pointer-events-auto"
-                modifiers={{
-                  hasTask: taskDates,
-                }}
-                modifiersStyles={{
-                  hasTask: {
-                    backgroundColor: 'hsl(var(--primary))',
-                    color: 'hsl(var(--primary-foreground))',
-                    borderRadius: '6px',
-                  },
-                }}
-              />
+            <CardContent>
+              <div className="flex gap-4 overflow-x-auto pb-4">
+                {/* Previous Month */}
+                <div className="flex-shrink-0">
+                  <h3 className="text-sm font-medium text-muted-foreground mb-2 text-center">
+                    {format(previousMonth, 'MMMM yyyy')}
+                  </h3>
+                  <CalendarComponent
+                    mode="single"
+                    selected={date}
+                    onSelect={setDate}
+                    month={previousMonth}
+                    className="rounded-md border bg-background/50 p-3 pointer-events-auto"
+                    modifiers={{
+                      hasTask: taskDates,
+                    }}
+                    modifiersStyles={{
+                      hasTask: {
+                        backgroundColor: 'hsl(var(--primary))',
+                        color: 'hsl(var(--primary-foreground))',
+                        borderRadius: '6px',
+                      },
+                    }}
+                  />
+                </div>
+
+                {/* Current Month */}
+                <div className="flex-shrink-0">
+                  <h3 className="text-sm font-medium mb-2 text-center">
+                    {format(currentMonth, 'MMMM yyyy')}
+                  </h3>
+                  <CalendarComponent
+                    mode="single"
+                    selected={date}
+                    onSelect={setDate}
+                    month={currentMonth}
+                    className="rounded-md border bg-background/50 p-3 pointer-events-auto"
+                    modifiers={{
+                      hasTask: taskDates,
+                    }}
+                    modifiersStyles={{
+                      hasTask: {
+                        backgroundColor: 'hsl(var(--primary))',
+                        color: 'hsl(var(--primary-foreground))',
+                        borderRadius: '6px',
+                      },
+                    }}
+                  />
+                </div>
+
+                {/* Next Month */}
+                <div className="flex-shrink-0">
+                  <h3 className="text-sm font-medium text-muted-foreground mb-2 text-center">
+                    {format(nextMonth, 'MMMM yyyy')}
+                  </h3>
+                  <CalendarComponent
+                    mode="single"
+                    selected={date}
+                    onSelect={setDate}
+                    month={nextMonth}
+                    className="rounded-md border bg-background/50 p-3 pointer-events-auto"
+                    modifiers={{
+                      hasTask: taskDates,
+                    }}
+                    modifiersStyles={{
+                      hasTask: {
+                        backgroundColor: 'hsl(var(--primary))',
+                        color: 'hsl(var(--primary-foreground))',
+                        borderRadius: '6px',
+                      },
+                    }}
+                  />
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>

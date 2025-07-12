@@ -1,5 +1,6 @@
 import { Task, TaskStatus } from "@/types/task";
 import { useToast } from "@/hooks/use-toast";
+import { useSettings } from "@/contexts/SettingsContext";
 
 export function useTaskHandlers(
   createTask: (data: any) => Promise<any>,
@@ -8,9 +9,13 @@ export function useTaskHandlers(
   profiles: any[]
 ) {
   const { toast } = useToast();
+  const { defaultProjectId } = useSettings();
 
   const handleCreateTask = async (taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => {
     try {
+      // Use default project if no project is specified
+      const projectId = taskData.projectId || defaultProjectId;
+      
       // Convert frontend task data to database format
       const dbTaskData = {
         title: taskData.title,
@@ -18,7 +23,7 @@ export function useTaskHandlers(
         status: taskData.status,
         priority: taskData.priority,
         assignee_id: taskData.assignee || null,
-        project_id: taskData.projectId,
+        project_id: projectId,
         due_date: taskData.dueDate,
         estimated_hours: taskData.estimatedHours || 0,
       };
