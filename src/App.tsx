@@ -48,6 +48,7 @@ function AppContent() {
   );
 }
 
+// Main App component that provides auth context
 function App() {
   return (
     <AuthProvider>
