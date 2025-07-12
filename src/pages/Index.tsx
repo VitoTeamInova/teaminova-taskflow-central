@@ -8,6 +8,7 @@ import Dashboard from "./Dashboard";
 import Calendar from "./Calendar";
 import Team from "./Team";
 import Projects from "./Projects";
+import ProjectDetail from "./ProjectDetail";
 import { Task, TaskStatus } from "@/types/task";
 import { mockTasks, mockProjects, mockTeamMembers } from "@/data/mockData";
 import { useToast } from "@/hooks/use-toast";
@@ -18,6 +19,7 @@ const Index = () => {
   const [createTaskOpen, setCreateTaskOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [taskDetailOpen, setTaskDetailOpen] = useState(false);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const handleCreateTask = (taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => {
@@ -71,6 +73,22 @@ const Index = () => {
     });
   };
 
+  const handleViewChange = (view: string) => {
+    if (view.startsWith('project-')) {
+      const projectId = view.replace('project-', '');
+      setSelectedProjectId(projectId);
+      setActiveView('project-detail');
+    } else {
+      setActiveView(view);
+      setSelectedProjectId(null);
+    }
+  };
+
+  const handleCreateProject = () => {
+    setActiveView('projects');
+    // The Projects component handles the creation dialog
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header onCreateTask={() => setCreateTaskOpen(true)} />
@@ -79,8 +97,8 @@ const Index = () => {
         <Sidebar 
           projects={mockProjects} 
           activeView={activeView} 
-          onViewChange={setActiveView}
-          onCreateTask={() => setCreateTaskOpen(true)}
+          onViewChange={handleViewChange}
+          onCreateProject={handleCreateProject}
         />
         
         <main className="flex-1 overflow-hidden">
@@ -97,6 +115,13 @@ const Index = () => {
           {activeView === 'calendar' && <Calendar />}
           {activeView === 'team' && <Team />}
           {activeView === 'projects' && <Projects />}
+          
+          {activeView === 'project-detail' && selectedProjectId && (
+            <ProjectDetail 
+              projectId={selectedProjectId} 
+              onBack={() => setActiveView('projects')}
+            />
+          )}
           
           {activeView === 'reports' && (
             <div className="h-full flex items-center justify-center">

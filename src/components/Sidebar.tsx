@@ -7,7 +7,7 @@ interface SidebarProps {
   projects: Project[];
   activeView: string;
   onViewChange: (view: string) => void;
-  onCreateTask?: () => void;
+  onCreateProject?: () => void;
 }
 
 const navigationItems = [
@@ -19,7 +19,7 @@ const navigationItems = [
   { id: 'reports', label: 'Reports', icon: BarChart3 },
 ];
 
-export function Sidebar({ projects, activeView, onViewChange, onCreateTask }: SidebarProps) {
+export function Sidebar({ projects, activeView, onViewChange, onCreateProject }: SidebarProps) {
   return (
     <aside className="w-64 border-r bg-card h-full">
       <div className="p-4">
@@ -51,8 +51,8 @@ export function Sidebar({ projects, activeView, onViewChange, onCreateTask }: Si
               variant="ghost" 
               size="sm" 
               className="h-6 w-6 p-0"
-              onClick={onCreateTask}
-              title="Create new task"
+              onClick={onCreateProject}
+              title="Create new project"
             >
               <Plus className="h-4 w-4" />
             </Button>
