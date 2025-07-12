@@ -1,31 +1,59 @@
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Clock, AlertTriangle, TrendingUp, Users, Calendar } from "lucide-react";
-import { mockTasks, mockProjects, mockTeamMembers } from "@/data/mockData";
-import { Task } from "@/types/task";
+import { Task, TaskStatus } from "@/types/task";
+import { useSupabaseData } from "@/hooks/useSupabaseData";
+import { Loader2 } from "lucide-react";
 
 const Dashboard = () => {
-  const [tasks] = useState<Task[]>(mockTasks);
+  const { tasks, projects, profiles, loading } = useSupabaseData();
+
+  // Convert database tasks to frontend format
+  const convertedTasks: Task[] = tasks.map(task => ({
+    id: task.id,
+    title: task.title,
+    description: task.description || '',
+    status: task.status as TaskStatus,
+    priority: task.priority as any,
+    assignee: task.assignee?.name || '',
+    projectId: task.project_id,
+    dueDate: task.due_date || undefined,
+    startDate: task.start_date || undefined,
+    completionDate: task.completion_date || undefined,
+    percentCompleted: task.percent_completed,
+    estimatedHours: task.estimated_hours,
+    actualHours: task.actual_hours,
+    updateLog: [],
+    relatedTasks: [],
+    createdAt: task.created_at,
+    updatedAt: task.updated_at,
+  }));
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   // Calculate dashboard metrics
-  const totalTasks = tasks.length;
-  const inProgressTasks = tasks.filter(task => task.status === 'in-progress').length;
-  const overdueTasks = tasks.filter(task => {
+  const totalTasks = convertedTasks.length;
+  const inProgressTasks = convertedTasks.filter(task => task.status === 'in-progress').length;
+  const overdueTasks = convertedTasks.filter(task => {
     if (!task.dueDate) return false;
     return new Date(task.dueDate) < new Date() && task.status !== 'completed';
   }).length;
   
-  const completionRate = totalTasks > 0 ? ((tasks.filter(task => task.status === 'completed').length / totalTasks) * 100) : 0;
+  const completionRate = totalTasks > 0 ? ((convertedTasks.filter(task => task.status === 'completed').length / totalTasks) * 100) : 0;
 
-  // Recent activity
-  const recentActivity = tasks
-    .filter(task => task.updateLog.length > 0)
-    .sort((a, b) => new Date(b.updateLog[0].timestamp).getTime() - new Date(a.updateLog[0].timestamp).getTime())
+  // Recent activity - showing recent tasks since we don't have update logs yet
+  const recentActivity = convertedTasks
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 5);
 
   // Upcoming deadlines
-  const upcomingDeadlines = tasks
+  const upcomingDeadlines = convertedTasks
     .filter(task => task.dueDate && task.status !== 'completed')
     .sort((a, b) => new Date(a.dueDate!).getTime() - new Date(b.dueDate!).getTime())
     .slice(0, 5);
@@ -47,7 +75,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background p-6 space-y-6">
       <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground rounded-lg p-6">
         <h1 className="text-2xl font-bold">Welcome back, John!</h1>
-        <p className="text-primary-foreground/80">You have {tasks.filter(task => task.assignee === 'John Smith').length} tasks assigned to you</p>
+        <p className="text-primary-foreground/80">You have {convertedTasks.length} tasks in the system</p>
       </div>
 
       {/* Statistics Cards */}
@@ -105,11 +133,11 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {tasks.filter(task => task.assignee === 'John Smith').slice(0, 3).map(task => (
+              {convertedTasks.slice(0, 3).map(task => (
                 <div key={task.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
                   <div className="flex-1">
                     <p className="font-medium text-sm">{task.title}</p>
-                    <p className="text-xs text-muted-foreground">{task.projectId}</p>
+                    <p className="text-xs text-muted-foreground">{projects.find(p => p.id === task.projectId)?.name || 'No Project'}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge variant={task.priority === 'critical' ? 'destructive' : task.priority === 'high' ? 'default' : 'secondary'}>
@@ -167,8 +195,8 @@ const Dashboard = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {mockProjects.map(project => {
-              const projectTasks = tasks.filter(task => task.projectId === project.id);
+            {projects.map(project => {
+              const projectTasks = convertedTasks.filter(task => task.projectId === project.id);
               const completedTasks = projectTasks.filter(task => task.status === 'completed').length;
               const progress = projectTasks.length > 0 ? (completedTasks / projectTasks.length) * 100 : 0;
               
@@ -184,9 +212,9 @@ const Dashboard = () => {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-muted-foreground">
-                        {mockTeamMembers.find(m => m.id === project.projectManager)?.name || 'Unassigned'} members
+                        {profiles.find(p => p.id === project.project_manager_id)?.name || 'Unassigned'}
                       </span>
-                      <Badge variant="outline" className="text-green-600">On Track</Badge>
+                      <Badge variant="outline" className="text-green-600">Active</Badge>
                     </div>
                   </div>
                   <div className="text-xs text-muted-foreground">{project.description}</div>
@@ -201,7 +229,7 @@ const Dashboard = () => {
                   </div>
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
                     <span>{progress.toFixed(0)}% Complete</span>
-                    <span>{project.targetCompletionDate}</span>
+                    <span>{project.target_completion_date || 'No target date'}</span>
                   </div>
                 </div>
               );
@@ -223,13 +251,13 @@ const Dashboard = () => {
                 <div className="w-2 h-2 rounded-full bg-primary mt-2" />
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-sm">{task.assignee}</span>
+                    <span className="font-medium text-sm">{task.assignee || 'Unassigned'}</span>
                     <span className="text-xs text-muted-foreground">
-                      {new Date(task.updateLog[0].timestamp).toLocaleDateString()}
+                      {new Date(task.createdAt).toLocaleDateString()}
                     </span>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Task created by {task.assignee} on "{task.title}"
+                    Task "{task.title}" was created
                   </p>
                 </div>
               </div>
