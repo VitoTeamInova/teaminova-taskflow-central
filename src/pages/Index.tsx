@@ -4,6 +4,10 @@ import { Sidebar } from "@/components/Sidebar";
 import { TaskBoard } from "@/components/TaskBoard";
 import { CreateTaskDialog } from "@/components/CreateTaskDialog";
 import { TaskDetailDialog } from "@/components/TaskDetailDialog";
+import Dashboard from "./Dashboard";
+import Calendar from "./Calendar";
+import Team from "./Team";
+import Projects from "./Projects";
 import { Task, TaskStatus } from "@/types/task";
 import { mockTasks, mockProjects, mockTeamMembers } from "@/data/mockData";
 import { useToast } from "@/hooks/use-toast";
@@ -88,32 +92,10 @@ const Index = () => {
             />
           )}
           
-          {activeView === 'dashboard' && (
-            <div className="h-full flex items-center justify-center">
-              <div className="text-center">
-                <h2 className="text-2xl font-bold mb-2">Dashboard</h2>
-                <p className="text-muted-foreground">Coming soon...</p>
-              </div>
-            </div>
-          )}
-          
-          {activeView === 'calendar' && (
-            <div className="h-full flex items-center justify-center">
-              <div className="text-center">
-                <h2 className="text-2xl font-bold mb-2">Calendar View</h2>
-                <p className="text-muted-foreground">Coming soon...</p>
-              </div>
-            </div>
-          )}
-          
-          {activeView === 'team' && (
-            <div className="h-full flex items-center justify-center">
-              <div className="text-center">
-                <h2 className="text-2xl font-bold mb-2">Team Management</h2>
-                <p className="text-muted-foreground">Coming soon...</p>
-              </div>
-            </div>
-          )}
+          {activeView === 'dashboard' && <Dashboard />}
+          {activeView === 'calendar' && <Calendar />}
+          {activeView === 'team' && <Team />}
+          {activeView === 'projects' && <Projects />}
           
           {activeView === 'reports' && (
             <div className="h-full flex items-center justify-center">

@@ -5,6 +5,24 @@ export const mockProjects: Project[] = [
     id: '1',
     name: 'Website Redesign',
     description: 'Complete overhaul of company website',
+    status: 'in-progress',
+    projectManager: '1',
+    startDate: '2024-01-15',
+    targetCompletionDate: '2024-06-15',
+    milestones: [
+      {
+        id: 'm1',
+        title: 'Design Phase Complete',
+        dueDate: '2024-03-15',
+        completed: true
+      },
+      {
+        id: 'm2', 
+        title: 'Development Phase Complete',
+        dueDate: '2024-05-15',
+        completed: false
+      }
+    ],
     color: '#3B82F6',
     createdAt: '2024-01-15T10:00:00Z'
   },
@@ -12,6 +30,18 @@ export const mockProjects: Project[] = [
     id: '2',
     name: 'Mobile App',
     description: 'New mobile application development',
+    status: 'started',
+    projectManager: '2',
+    startDate: '2024-02-01',
+    targetCompletionDate: '2024-08-01',
+    milestones: [
+      {
+        id: 'm3',
+        title: 'MVP Release',
+        dueDate: '2024-05-01',
+        completed: false
+      }
+    ],
     color: '#10B981',
     createdAt: '2024-01-20T10:00:00Z'
   },
@@ -19,6 +49,11 @@ export const mockProjects: Project[] = [
     id: '3',
     name: 'Marketing Campaign',
     description: 'Q1 2024 marketing initiatives',
+    status: 'planned',
+    projectManager: '3',
+    startDate: '2024-03-01',
+    targetCompletionDate: '2024-05-31',
+    milestones: [],
     color: '#F59E0B',
     createdAt: '2024-02-01T10:00:00Z'
   }
@@ -29,24 +64,28 @@ export const mockTeamMembers: TeamMember[] = [
     id: '1',
     name: 'John Smith',
     email: 'john@teaminova.com',
+    role: 'Project Manager',
     avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face&auto=format'
   },
   {
     id: '2',
     name: 'Sarah Johnson',
     email: 'sarah@teaminova.com',
+    role: 'UI/UX Designer',
     avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=32&h=32&fit=crop&crop=face&auto=format'
   },
   {
     id: '3',
     name: 'Mike Chen',
     email: 'mike@teaminova.com',
+    role: 'Full Stack Developer',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=32&h=32&fit=crop&crop=face&auto=format'
   },
   {
     id: '4',
     name: 'Emily Davis',
     email: 'emily@teaminova.com',
+    role: 'Marketing Specialist',
     avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=32&h=32&fit=crop&crop=face&auto=format'
   }
 ];
