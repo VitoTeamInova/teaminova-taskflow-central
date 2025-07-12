@@ -32,6 +32,7 @@ export function CreateTaskDialog({
     projectId: '',
     dueDate: '',
     startDate: '',
+    completionDate: '',
     percentCompleted: 0,
     estimatedHours: 0,
     actualHours: 0,
@@ -46,7 +47,8 @@ export function CreateTaskDialog({
     onCreateTask({
       ...formData,
       dueDate: formData.dueDate || undefined,
-      startDate: formData.startDate || undefined
+      startDate: formData.startDate || undefined,
+      completionDate: formData.completionDate || undefined
     });
 
     // Reset form
@@ -59,6 +61,7 @@ export function CreateTaskDialog({
       projectId: '',
       dueDate: '',
       startDate: '',
+      completionDate: '',
       percentCompleted: 0,
       estimatedHours: 0,
       actualHours: 0,
@@ -78,180 +81,209 @@ export function CreateTaskDialog({
         
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 gap-4">
-            <div>
-              <Label htmlFor="title">Task Title *</Label>
-              <Input
-                id="title"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                placeholder="Enter task title..."
-                className="mt-1"
-                required
-              />
-            </div>
+            <div className="bg-blue-50/50 p-4 rounded-lg">
+              <h4 className="font-medium mb-3 text-sm">Basic Information</h4>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="title">Task Title *</Label>
+                  <Input
+                    id="title"
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    placeholder="Enter task title..."
+                    className="mt-1"
+                    required
+                  />
+                </div>
 
-            <div>
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Describe the task..."
-                className="mt-1"
-                rows={3}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Priority</Label>
-                <Select 
-                  value={formData.priority} 
-                  onValueChange={(value: TaskPriority) => setFormData({ ...formData, priority: value })}
-                >
-                  <SelectTrigger className="mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="critical">Critical</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Status</Label>
-                <Select 
-                  value={formData.status} 
-                  onValueChange={(value: TaskStatus) => setFormData({ ...formData, status: value })}
-                >
-                  <SelectTrigger className="mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="todo">To Do</SelectItem>
-                    <SelectItem value="in-progress">In Progress</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                    <SelectItem value="on-hold">On Hold</SelectItem>
-                    <SelectItem value="blocked">Blocked</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div>
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    placeholder="Describe the task..."
+                    className="mt-1"
+                    rows={3}
+                  />
+                </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Project</Label>
-                <Select 
-                  value={formData.projectId} 
-                  onValueChange={(value) => setFormData({ ...formData, projectId: value })}
-                >
-                  <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Select project..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {projects.map((project) => (
-                      <SelectItem key={project.id} value={project.id}>
-                        {project.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="bg-blue-50/50 p-4 rounded-lg">
+              <h4 className="font-medium mb-3 text-sm">Task Details</h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Priority</Label>
+                  <Select 
+                    value={formData.priority} 
+                    onValueChange={(value: TaskPriority) => setFormData({ ...formData, priority: value })}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="low">Low</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="critical">Critical</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <div>
-                <Label>Assignee</Label>
-                <Select 
-                  value={formData.assignee} 
-                  onValueChange={(value) => setFormData({ ...formData, assignee: value })}
-                >
-                  <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Assign to..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {teamMembers.map((member) => (
-                      <SelectItem key={member.id} value={member.name}>
-                        {member.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="startDate">Start Date</Label>
-                <Input
-                  id="startDate"
-                  type="date"
-                  value={formData.startDate}
-                  onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                  className="mt-1"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="dueDate">Due Date</Label>
-                <Input
-                  id="dueDate"
-                  type="date"
-                  value={formData.dueDate}
-                  onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
-                  className="mt-1"
-                />
+                <div>
+                  <Label>Status</Label>
+                  <Select 
+                    value={formData.status} 
+                    onValueChange={(value: TaskStatus) => setFormData({ ...formData, status: value })}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="todo">To Do</SelectItem>
+                      <SelectItem value="in-progress">In Progress</SelectItem>
+                      <SelectItem value="completed">Completed</SelectItem>
+                      <SelectItem value="on-hold">On Hold</SelectItem>
+                      <SelectItem value="blocked">Blocked</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="percentCompleted">Percent Completed (%)</Label>
-                <Input
-                  id="percentCompleted"
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={formData.percentCompleted}
-                  onChange={(e) => setFormData({ ...formData, percentCompleted: Number(e.target.value) })}
-                  className="mt-1"
-                />
-              </div>
+            <div className="bg-blue-50/50 p-4 rounded-lg">
+              <h4 className="font-medium mb-3 text-sm">Assignment</h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Project</Label>
+                  <Select 
+                    value={formData.projectId} 
+                    onValueChange={(value) => setFormData({ ...formData, projectId: value })}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Select project..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {projects.map((project) => (
+                        <SelectItem key={project.id} value={project.id}>
+                          {project.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <div>
-                <Label htmlFor="estimatedHours">Estimated Hours</Label>
-                <Input
-                  id="estimatedHours"
-                  type="number"
-                  min="0"
-                  step="0.5"
-                  value={formData.estimatedHours}
-                  onChange={(e) => setFormData({ ...formData, estimatedHours: Number(e.target.value) })}
-                  className="mt-1"
-                />
+                <div>
+                  <Label>Assignee</Label>
+                  <Select 
+                    value={formData.assignee} 
+                    onValueChange={(value) => setFormData({ ...formData, assignee: value })}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Assign to..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {teamMembers.map((member) => (
+                        <SelectItem key={member.id} value={member.name}>
+                          {member.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
+            </div>
 
-              <div>
-                <Label htmlFor="actualHours">Actual Hours</Label>
-                <Input
-                  id="actualHours"
-                  type="number"
-                  min="0"
-                  step="0.5"
-                  value={formData.actualHours}
-                  onChange={(e) => setFormData({ ...formData, actualHours: Number(e.target.value) })}
-                  className="mt-1"
-                />
+            <div className="bg-blue-50/50 p-4 rounded-lg">
+              <h4 className="font-medium mb-3 text-sm">Date Information</h4>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="startDate">Start Date</Label>
+                  <Input
+                    id="startDate"
+                    type="date"
+                    value={formData.startDate}
+                    onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="dueDate">Due Date</Label>
+                  <Input
+                    id="dueDate"
+                    type="date"
+                    value={formData.dueDate}
+                    onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="completionDate">Completion Date</Label>
+                  <Input
+                    id="completionDate"
+                    type="date"
+                    value={formData.completionDate}
+                    onChange={(e) => setFormData({ ...formData, completionDate: e.target.value })}
+                    className="mt-1"
+                    disabled={formData.status !== 'completed'}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-blue-50/50 p-4 rounded-lg">
+              <h4 className="font-medium mb-3 text-sm">Progress & Time Tracking</h4>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="percentCompleted">Percent Completed (%)</Label>
+                  <Input
+                    id="percentCompleted"
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={formData.percentCompleted}
+                    onChange={(e) => setFormData({ ...formData, percentCompleted: Number(e.target.value) })}
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="estimatedHours">Estimated Hours</Label>
+                  <Input
+                    id="estimatedHours"
+                    type="number"
+                    min="0"
+                    step="0.5"
+                    value={formData.estimatedHours}
+                    onChange={(e) => setFormData({ ...formData, estimatedHours: Number(e.target.value) })}
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="actualHours">Actual Hours</Label>
+                  <Input
+                    id="actualHours"
+                    type="number"
+                    min="0"
+                    step="0.5"
+                    value={formData.actualHours}
+                    onChange={(e) => setFormData({ ...formData, actualHours: Number(e.target.value) })}
+                    className="mt-1"
+                  />
+                </div>
               </div>
             </div>
           </div>
 
           <div className="flex justify-end gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="bg-gray-100 hover:bg-gray-200">
               Cancel
             </Button>
-            <Button type="submit" className="bg-primary hover:bg-primary-hover">
+            <Button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white">
               Create Task
             </Button>
           </div>

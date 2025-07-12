@@ -26,7 +26,8 @@ const Team = () => {
   const [newMember, setNewMember] = useState({
     name: '',
     email: '',
-    role: ''
+    role: '',
+    photo: ''
   });
 
   const handleAddMember = () => {
@@ -44,11 +45,12 @@ const Team = () => {
       name: newMember.name,
       email: newMember.email,
       role: newMember.role,
-      avatar: `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face&auto=format`
+      avatar: newMember.photo || `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face&auto=format`,
+      photo: newMember.photo
     };
 
     setTeamMembers([...teamMembers, member]);
-    setNewMember({ name: '', email: '', role: '' });
+    setNewMember({ name: '', email: '', role: '', photo: '' });
     setIsAddDialogOpen(false);
     
     toast({
@@ -111,7 +113,8 @@ const Team = () => {
             <DialogHeader>
               <DialogTitle>Add New Team Member</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 bg-muted/20 p-4 rounded-lg">
+            <div className="space-y-4 bg-blue-50/50 p-4 rounded-lg">
+              <h4 className="font-medium mb-3 text-sm">Team Member Information</h4>
               <div>
                 <Label htmlFor="name">Full Name</Label>
                 <Input
@@ -140,9 +143,18 @@ const Team = () => {
                   placeholder="Enter role (e.g., Developer, Designer)"
                 />
               </div>
+              <div>
+                <Label htmlFor="photo">Photo URL</Label>
+                <Input
+                  id="photo"
+                  value={newMember.photo || ''}
+                  onChange={(e) => setNewMember({ ...newMember, photo: e.target.value })}
+                  placeholder="Enter photo URL (optional)"
+                />
+              </div>
               <div className="flex gap-2 pt-4">
-                <Button onClick={handleAddMember} className="flex-1">Add Member</Button>
-                <Button variant="outline" onClick={() => setIsAddDialogOpen(false)} className="flex-1">
+                <Button onClick={handleAddMember} className="flex-1 bg-blue-500 hover:bg-blue-600 text-white">Add Member</Button>
+                <Button variant="outline" onClick={() => setIsAddDialogOpen(false)} className="flex-1 bg-gray-100 hover:bg-gray-200">
                   Cancel
                 </Button>
               </div>
@@ -316,7 +328,8 @@ const Team = () => {
             <DialogTitle>Edit Team Member</DialogTitle>
           </DialogHeader>
           {editingMember && (
-            <div className="space-y-4 bg-muted/20 p-4 rounded-lg">
+            <div className="space-y-4 bg-blue-50/50 p-4 rounded-lg">
+              <h4 className="font-medium mb-3 text-sm">Edit Team Member</h4>
               <div>
                 <Label htmlFor="edit-name">Full Name</Label>
                 <Input
@@ -342,9 +355,18 @@ const Team = () => {
                   onChange={(e) => setEditingMember({ ...editingMember, role: e.target.value })}
                 />
               </div>
+              <div>
+                <Label htmlFor="edit-photo">Photo URL</Label>
+                <Input
+                  id="edit-photo"
+                  value={editingMember.photo || ''}
+                  onChange={(e) => setEditingMember({ ...editingMember, photo: e.target.value })}
+                  placeholder="Enter photo URL (optional)"
+                />
+              </div>
               <div className="flex gap-2 pt-4">
-                <Button onClick={handleEditMember} className="flex-1">Save Changes</Button>
-                <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} className="flex-1">
+                <Button onClick={handleEditMember} className="flex-1 bg-blue-500 hover:bg-blue-600 text-white">Save Changes</Button>
+                <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} className="flex-1 bg-gray-100 hover:bg-gray-200">
                   Cancel
                 </Button>
               </div>

@@ -55,4 +55,5 @@ export interface TeamMember {
   email: string;
   role: string;
   avatar: string;
+  photo?: string;
 }

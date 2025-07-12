@@ -121,6 +121,8 @@ const Index = () => {
         onOpenChange={setTaskDetailOpen}
         task={editingTask}
         allTasks={tasks}
+        projects={mockProjects}
+        teamMembers={mockTeamMembers}
         onUpdateTask={handleUpdateTask}
       />
     </div>
