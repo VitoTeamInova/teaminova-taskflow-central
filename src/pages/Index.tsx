@@ -9,7 +9,7 @@ import { useViewNavigation } from "@/hooks/useViewNavigation";
 import { useTaskHandlers } from "@/hooks/useTaskHandlers";
 
 const Index = () => {
-  const { tasks, projects, profiles, loading, createTask, updateTask } = useAppData();
+  const { tasks, projects, profiles, loading, createTask, updateTask, createUpdateLog } = useAppData();
   const { 
     createTaskOpen, 
     editingTask, 
@@ -29,8 +29,9 @@ const Index = () => {
   const { 
     handleCreateTask, 
     handleStatusChange, 
-    handleUpdateTask 
-  } = useTaskHandlers(createTask, updateTask, profiles);
+    handleUpdateTask,
+    handleAddUpdate
+  } = useTaskHandlers(createTask, updateTask, createUpdateLog, profiles);
 
   if (loading) {
     return (
@@ -76,6 +77,7 @@ const Index = () => {
         projects={projects}
         teamMembers={profiles}
         onUpdateTask={handleUpdateTask}
+        onAddUpdate={handleAddUpdate}
       />
     </>
   );

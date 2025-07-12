@@ -172,6 +172,29 @@ export const useSupabaseData = () => {
     return data;
   };
 
+  const createUpdateLog = async (taskId: string, text: string) => {
+    if (!user) {
+      throw new Error('User must be authenticated to create update logs');
+    }
+
+    const { data, error } = await supabase
+      .from('update_log')
+      .insert({
+        task_id: taskId,
+        text: text
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating update log:', error);
+      throw error;
+    }
+
+    console.log('Update log created successfully:', data);
+    return data;
+  };
+
   const createProject = async (projectData: any) => {
     if (!user) {
       throw new Error('User must be authenticated to create projects');
@@ -220,6 +243,7 @@ export const useSupabaseData = () => {
     createTask,
     updateTask,
     createProject,
+    createUpdateLog,
     refetchTasks: fetchTasks,
     refetchProjects: fetchProjects,
     refetchProfiles: fetchProfiles,

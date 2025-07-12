@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 export function useTaskHandlers(
   createTask: (data: any) => Promise<any>,
   updateTask: (id: string, data: any) => Promise<any>,
+  createUpdateLog: (taskId: string, text: string) => Promise<any>,
   profiles: any[]
 ) {
   const { toast } = useToast();
@@ -85,9 +86,27 @@ export function useTaskHandlers(
     }
   };
 
+  const handleAddUpdate = async (taskId: string, updateText: string) => {
+    try {
+      await createUpdateLog(taskId, updateText);
+      
+      toast({
+        title: "Update added",
+        description: "Task update has been successfully added.",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error adding update",
+        description: "Failed to add update. Please try again.",
+      });
+    }
+  };
+
   return {
     handleCreateTask,
     handleStatusChange,
-    handleUpdateTask
+    handleUpdateTask,
+    handleAddUpdate
   };
 }

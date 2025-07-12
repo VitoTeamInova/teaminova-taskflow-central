@@ -8,7 +8,8 @@ export function useAppData() {
     profiles, 
     loading, 
     createTask, 
-    updateTask 
+    updateTask,
+    createUpdateLog
   } = useSupabaseData();
 
   // Convert database tasks to frontend format for backward compatibility
@@ -67,6 +68,7 @@ export function useAppData() {
     profiles: convertedProfiles,
     loading,
     createTask,
-    updateTask
+    updateTask,
+    createUpdateLog
   };
 }

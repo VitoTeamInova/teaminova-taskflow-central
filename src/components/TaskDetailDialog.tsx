@@ -22,6 +22,7 @@ interface TaskDetailDialogProps {
   projects: Project[];
   teamMembers: TeamMember[];
   onUpdateTask: (taskId: string, updates: Partial<Task>) => void;
+  onAddUpdate: (taskId: string, updateText: string) => void;
 }
 
 export function TaskDetailDialog({ 
@@ -31,7 +32,8 @@ export function TaskDetailDialog({
   allTasks,
   projects,
   teamMembers,
-  onUpdateTask 
+  onUpdateTask,
+  onAddUpdate
 }: TaskDetailDialogProps) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [updateLogOpen, setUpdateLogOpen] = useState(false);
@@ -117,16 +119,7 @@ export function TaskDetailDialog({
   };
 
   const handleAddUpdate = (updateText: string) => {
-    const newUpdate: UpdateLogEntry = {
-      timestamp: new Date().toISOString(),
-      text: updateText
-    };
-    
-    const updatedLog = [newUpdate, ...task.updateLog];
-    onUpdateTask(task.id, { 
-      updateLog: updatedLog,
-      updatedAt: new Date().toISOString()
-    });
+    onAddUpdate(task.id, updateText);
   };
 
   const handleUpdateRelatedTasks = (relatedTaskIds: string[]) => {
@@ -182,15 +175,15 @@ export function TaskDetailDialog({
         <DialogContent className="max-w-4xl max-h-[90vh]">
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between">
-              <div className="bg-blue-100/80 p-4 rounded-lg w-full mr-4">
+              <div className="bg-gray-200 p-4 rounded-lg w-full mr-4">
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-2">
                     {currentProject && (
-                      <Badge variant="outline" className="text-sm bg-purple-100 text-purple-800">
+                      <span className="text-base font-bold text-black bg-gray-200 px-2 py-1 rounded">
                         {currentProject.name}
-                      </Badge>
+                      </span>
                     )}
-                    <span className="text-lg font-semibold">{task.title}</span>
+                    <span className="text-sm font-semibold">{task.title}</span>
                     <Badge variant="outline" className={`text-xs ${priorityColors[task.priority]}`}>
                       {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
                     </Badge>
@@ -204,6 +197,15 @@ export function TaskDetailDialog({
               <div className="flex gap-2">
                 {isEditMode ? (
                   <>
+                    <Button 
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setUpdateLogOpen(true)}
+                      className="flex items-center gap-1 bg-blue-100 hover:bg-blue-200"
+                    >
+                      <Edit className="h-3 w-3" />
+                      Update
+                    </Button>
                     <Button onClick={handleSave} size="sm" className="bg-blue-500 hover:bg-blue-600 text-white">
                       <Save className="h-4 w-4 mr-1" />
                       Save
@@ -233,7 +235,7 @@ export function TaskDetailDialog({
             <div className="space-y-6 pr-4">
               {/* Basic Info */}
               <div className="bg-blue-50/50 p-4 rounded-lg">
-                <h4 className="font-medium mb-3 text-sm">Basic Information</h4>
+                <h4 className="font-bold underline mb-3 text-sm">Basic Information</h4>
                 <div className="grid grid-cols-1 gap-4">
                   <div>
                     <Label className="text-sm font-semibold">Task Title</Label>
@@ -268,7 +270,7 @@ export function TaskDetailDialog({
 
               {/* Task Details */}
               <div className="bg-blue-50/50 p-4 rounded-lg">
-                <h4 className="font-medium mb-3 text-sm">Task Details</h4>
+                <h4 className="font-bold underline mb-3 text-sm">Task Details</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-4">
                     <div>
@@ -377,7 +379,7 @@ export function TaskDetailDialog({
 
               {/* Date Information */}
               <div className="bg-blue-50/50 p-4 rounded-lg">
-                <h4 className="font-medium mb-3 text-sm">Date Information</h4>
+                <h4 className="font-bold underline mb-3 text-sm">Date Information</h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <Label className="text-sm font-semibold">Start Date</Label>
@@ -447,7 +449,7 @@ export function TaskDetailDialog({
 
               {/* Progress and Time Tracking */}
               <div className="bg-blue-50/50 p-4 rounded-lg">
-                <h4 className="font-medium mb-3 text-sm">Progress & Time Tracking</h4>
+                <h4 className="font-bold underline mb-3 text-sm">Progress & Time Tracking</h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <Label className="text-sm font-semibold">Percent Completed (%)</Label>
@@ -532,16 +534,18 @@ export function TaskDetailDialog({
               {/* Update Log */}
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <Label className="text-sm font-semibold">Update Log</Label>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setUpdateLogOpen(true)}
-                    className="flex items-center gap-1 bg-blue-100 hover:bg-blue-200"
-                  >
-                    <Edit className="h-3 w-3" />
-                    Update
-                  </Button>
+                  <Label className="text-sm font-bold underline">Update Log</Label>
+                  {!isEditMode && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setUpdateLogOpen(true)}
+                      className="flex items-center gap-1 bg-blue-100 hover:bg-blue-200"
+                    >
+                      <Edit className="h-3 w-3" />
+                      Update
+                    </Button>
+                  )}
                 </div>
                 
                 {task.updateLog.length === 0 ? (
@@ -565,7 +569,7 @@ export function TaskDetailDialog({
               {/* Related Tasks */}
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <Label className="text-sm font-semibold">Related Tasks</Label>
+                  <Label className="text-sm font-bold underline">Related Tasks</Label>
                   <Button
                     variant="outline"
                     size="sm"
