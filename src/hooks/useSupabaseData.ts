@@ -124,6 +124,13 @@ export const useSupabaseData = () => {
   };
 
   const createTask = async (taskData: any) => {
+    if (!user) {
+      throw new Error('User must be authenticated to create tasks');
+    }
+
+    console.log('Creating task with data:', taskData);
+    console.log('Current user:', user.id);
+
     const { data, error } = await supabase
       .from('tasks')
       .insert(taskData)
@@ -139,6 +146,7 @@ export const useSupabaseData = () => {
       throw error;
     }
 
+    console.log('Task created successfully:', data);
     setTasks(prev => [data, ...prev]);
     return data;
   };
@@ -165,6 +173,13 @@ export const useSupabaseData = () => {
   };
 
   const createProject = async (projectData: any) => {
+    if (!user) {
+      throw new Error('User must be authenticated to create projects');
+    }
+
+    console.log('Creating project with data:', projectData);
+    console.log('Current user:', user.id);
+
     const { data, error } = await supabase
       .from('projects')
       .insert(projectData)
@@ -180,6 +195,7 @@ export const useSupabaseData = () => {
       throw error;
     }
 
+    console.log('Project created successfully:', data);
     setProjects(prev => [data, ...prev]);
     return data;
   };
