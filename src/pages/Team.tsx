@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -9,15 +9,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Plus, Pencil, Trash2, User, Mail, Briefcase } from "lucide-react";
-import { mockTeamMembers, mockTasks } from "@/data/mockData";
-import { TeamMember, Task } from "@/types/task";
+import { useSupabaseData } from "@/hooks/useSupabaseData";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Team = () => {
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>(mockTeamMembers);
-  const [tasks] = useState<Task[]>(mockTasks);
-  const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
-  const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
+  const { profiles, tasks, loading, refetchProfiles } = useSupabaseData();
+  const [selectedMember, setSelectedMember] = useState<any>(null);
+  const [editingMember, setEditingMember] = useState<any>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isMemberDetailOpen, setIsMemberDetailOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -30,7 +29,7 @@ const Team = () => {
     photo: ''
   });
 
-  const handleAddMember = () => {
+  const handleAddMember = async () => {
     if (!newMember.name || !newMember.email || !newMember.role) {
       toast({
         title: "Error",
@@ -40,59 +39,140 @@ const Team = () => {
       return;
     }
 
-    const member: TeamMember = {
-      id: Date.now().toString(),
-      name: newMember.name,
-      email: newMember.email,
-      role: newMember.role,
-      avatar: newMember.photo || `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face&auto=format`,
-      photo: newMember.photo
-    };
+    try {
+      // For now, we'll create a basic auth user - in a real app you'd send an invitation
+      const { data, error } = await supabase.auth.signUp({
+        email: newMember.email,
+        password: 'TempPassword123!', // In production, send invitation email instead
+        options: {
+          data: {
+            name: newMember.name
+          }
+        }
+      });
 
-    setTeamMembers([...teamMembers, member]);
-    setNewMember({ name: '', email: '', role: '', photo: '' });
-    setIsAddDialogOpen(false);
-    
-    toast({
-      title: "Success",
-      description: `${member.name} has been added to the team.`,
-    });
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to add team member: " + error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // The profile will be created automatically by the trigger
+      await refetchProfiles();
+      setNewMember({ name: '', email: '', role: '', photo: '' });
+      setIsAddDialogOpen(false);
+      
+      toast({
+        title: "Success",
+        description: `${newMember.name} has been added to the team.`,
+      });
+    } catch (error) {
+      console.error('Error adding member:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add team member.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleEditMember = () => {
+  const handleEditMember = async () => {
     if (!editingMember) return;
 
-    setTeamMembers(members => 
-      members.map(member => 
-        member.id === editingMember.id ? editingMember : member
-      )
-    );
-    setIsEditDialogOpen(false);
-    setEditingMember(null);
-    
-    toast({
-      title: "Success",
-      description: "Team member updated successfully.",
-    });
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          name: editingMember.name,
+          email: editingMember.email,
+          role: editingMember.role,
+          avatar: editingMember.avatar
+        })
+        .eq('id', editingMember.id);
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to update team member: " + error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      await refetchProfiles();
+      setIsEditDialogOpen(false);
+      setEditingMember(null);
+      
+      toast({
+        title: "Success",
+        description: "Team member updated successfully.",
+      });
+    } catch (error) {
+      console.error('Error updating member:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update team member.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleDeleteMember = (memberId: string) => {
-    const member = teamMembers.find(m => m.id === memberId);
-    setTeamMembers(members => members.filter(m => m.id !== memberId));
+  const handleDeleteMember = async (memberId: string) => {
+    const member = profiles.find(m => m.id === memberId);
     
-    toast({
-      title: "Success",
-      description: `${member?.name} has been removed from the team.`,
-    });
+    try {
+      // Note: In production, you might want to deactivate instead of delete
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', memberId);
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to remove team member: " + error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      await refetchProfiles();
+      
+      toast({
+        title: "Success",
+        description: `${member?.name} has been removed from the team.`,
+      });
+    } catch (error) {
+      console.error('Error deleting member:', error);
+      toast({
+        title: "Error",
+        description: "Failed to remove team member.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const getMemberTasks = (memberName: string) => {
-    return tasks.filter(task => task.assignee === memberName);
+  const getMemberTasks = (memberId: string) => {
+    return tasks.filter(task => task.assignee_id === memberId);
   };
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background p-6 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Loading team members...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background p-6">
@@ -165,8 +245,8 @@ const Team = () => {
 
       {/* Team Members Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-        {teamMembers.map(member => {
-          const memberTasks = getMemberTasks(member.name);
+        {profiles.map(member => {
+          const memberTasks = getMemberTasks(member.id);
           const completedTasks = memberTasks.filter(task => task.status === 'completed').length;
           
           return (
@@ -180,7 +260,7 @@ const Team = () => {
                 </div>
                 <CardTitle className="text-lg">{member.name}</CardTitle>
                 <Badge variant="secondary" className="w-fit mx-auto">
-                  {member.role}
+                  {member.role || 'Member'}
                 </Badge>
               </CardHeader>
               
@@ -281,10 +361,10 @@ const Team = () => {
               <Separator />
 
               <div>
-                <h4 className="font-medium mb-3">Assigned Tasks ({getMemberTasks(selectedMember.name).length})</h4>
+                <h4 className="font-medium mb-3">Assigned Tasks ({getMemberTasks(selectedMember.id).length})</h4>
                 <ScrollArea className="h-64">
                   <div className="space-y-2">
-                    {getMemberTasks(selectedMember.name).map(task => (
+                    {getMemberTasks(selectedMember.id).map(task => (
                       <div key={task.id} className="p-3 bg-muted/30 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
                         <div className="flex items-start justify-between mb-2">
                           <h5 className="font-medium text-sm">{task.title}</h5>
@@ -303,10 +383,10 @@ const Team = () => {
                             {task.priority}
                           </Badge>
                           <div className="flex items-center gap-2">
-                            <span>{task.percentCompleted}% complete</span>
-                            {task.dueDate && (
+                            <span>{task.percent_completed}% complete</span>
+                            {task.due_date && (
                               <span className="text-muted-foreground">
-                                Due: {new Date(task.dueDate).toLocaleDateString()}
+                                Due: {new Date(task.due_date).toLocaleDateString()}
                               </span>
                             )}
                           </div>
@@ -359,8 +439,8 @@ const Team = () => {
                 <Label htmlFor="edit-photo">Photo URL</Label>
                 <Input
                   id="edit-photo"
-                  value={editingMember.photo || ''}
-                  onChange={(e) => setEditingMember({ ...editingMember, photo: e.target.value })}
+                  value={editingMember.avatar || ''}
+                  onChange={(e) => setEditingMember({ ...editingMember, avatar: e.target.value })}
                   placeholder="Enter photo URL (optional)"
                 />
               </div>
