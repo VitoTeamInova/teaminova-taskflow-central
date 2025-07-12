@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from './contexts/AuthContext';
+import { useAuth, AuthProvider } from './contexts/AuthContext';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,7 +11,7 @@ import { Loader2 } from 'lucide-react';
 
 const queryClient = new QueryClient();
 
-function App() {
+function AppContent() {
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -45,6 +45,14 @@ function App() {
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 
