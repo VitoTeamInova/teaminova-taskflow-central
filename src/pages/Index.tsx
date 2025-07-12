@@ -79,7 +79,8 @@ const Index = () => {
         <Sidebar 
           projects={mockProjects} 
           activeView={activeView} 
-          onViewChange={setActiveView} 
+          onViewChange={setActiveView}
+          onCreateTask={() => setCreateTaskOpen(true)}
         />
         
         <main className="flex-1 overflow-hidden">

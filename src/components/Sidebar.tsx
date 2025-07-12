@@ -1,4 +1,4 @@
-import { Home, CheckSquare, Calendar, Users, BarChart3, Settings, FolderOpen } from "lucide-react";
+import { Home, CheckSquare, Calendar, Users, BarChart3, Settings, FolderOpen, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Project } from "@/types/task";
@@ -7,6 +7,7 @@ interface SidebarProps {
   projects: Project[];
   activeView: string;
   onViewChange: (view: string) => void;
+  onCreateTask?: () => void;
 }
 
 const navigationItems = [
@@ -14,10 +15,11 @@ const navigationItems = [
   { id: 'tasks', label: 'All Tasks', icon: CheckSquare, count: 12 },
   { id: 'calendar', label: 'Calendar', icon: Calendar },
   { id: 'team', label: 'Team', icon: Users },
+  { id: 'projects', label: 'Projects', icon: FolderOpen },
   { id: 'reports', label: 'Reports', icon: BarChart3 },
 ];
 
-export function Sidebar({ projects, activeView, onViewChange }: SidebarProps) {
+export function Sidebar({ projects, activeView, onViewChange, onCreateTask }: SidebarProps) {
   return (
     <aside className="w-64 border-r bg-card h-full">
       <div className="p-4">
@@ -45,8 +47,14 @@ export function Sidebar({ projects, activeView, onViewChange }: SidebarProps) {
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
               Projects
             </h3>
-            <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-              <span className="text-lg">+</span>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-6 w-6 p-0"
+              onClick={onCreateTask}
+              title="Create new task"
+            >
+              <Plus className="h-4 w-4" />
             </Button>
           </div>
           
