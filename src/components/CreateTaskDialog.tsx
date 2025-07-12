@@ -30,7 +30,13 @@ export function CreateTaskDialog({
     priority: 'medium' as TaskPriority,
     assignee: '',
     projectId: '',
-    dueDate: ''
+    dueDate: '',
+    startDate: '',
+    percentCompleted: 0,
+    estimatedHours: 0,
+    actualHours: 0,
+    updateLog: [],
+    relatedTasks: []
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -39,7 +45,8 @@ export function CreateTaskDialog({
 
     onCreateTask({
       ...formData,
-      dueDate: formData.dueDate || undefined
+      dueDate: formData.dueDate || undefined,
+      startDate: formData.startDate || undefined
     });
 
     // Reset form
@@ -50,7 +57,13 @@ export function CreateTaskDialog({
       priority: 'medium',
       assignee: '',
       projectId: '',
-      dueDate: ''
+      dueDate: '',
+      startDate: '',
+      percentCompleted: 0,
+      estimatedHours: 0,
+      actualHours: 0,
+      updateLog: [],
+      relatedTasks: []
     });
     
     onOpenChange(false);
@@ -168,15 +181,69 @@ export function CreateTaskDialog({
               </div>
             </div>
 
-            <div>
-              <Label htmlFor="dueDate">Due Date</Label>
-              <Input
-                id="dueDate"
-                type="date"
-                value={formData.dueDate}
-                onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
-                className="mt-1"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="startDate">Start Date</Label>
+                <Input
+                  id="startDate"
+                  type="date"
+                  value={formData.startDate}
+                  onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="dueDate">Due Date</Label>
+                <Input
+                  id="dueDate"
+                  type="date"
+                  value={formData.dueDate}
+                  onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="percentCompleted">Percent Completed (%)</Label>
+                <Input
+                  id="percentCompleted"
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={formData.percentCompleted}
+                  onChange={(e) => setFormData({ ...formData, percentCompleted: Number(e.target.value) })}
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="estimatedHours">Estimated Hours</Label>
+                <Input
+                  id="estimatedHours"
+                  type="number"
+                  min="0"
+                  step="0.5"
+                  value={formData.estimatedHours}
+                  onChange={(e) => setFormData({ ...formData, estimatedHours: Number(e.target.value) })}
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="actualHours">Actual Hours</Label>
+                <Input
+                  id="actualHours"
+                  type="number"
+                  min="0"
+                  step="0.5"
+                  value={formData.actualHours}
+                  onChange={(e) => setFormData({ ...formData, actualHours: Number(e.target.value) })}
+                  className="mt-1"
+                />
+              </div>
             </div>
           </div>
 

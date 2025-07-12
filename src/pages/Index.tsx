@@ -3,6 +3,7 @@ import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
 import { TaskBoard } from "@/components/TaskBoard";
 import { CreateTaskDialog } from "@/components/CreateTaskDialog";
+import { TaskDetailDialog } from "@/components/TaskDetailDialog";
 import { Task, TaskStatus } from "@/types/task";
 import { mockTasks, mockProjects, mockTeamMembers } from "@/data/mockData";
 import { useToast } from "@/hooks/use-toast";
@@ -12,12 +13,18 @@ const Index = () => {
   const [activeView, setActiveView] = useState('tasks');
   const [createTaskOpen, setCreateTaskOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [taskDetailOpen, setTaskDetailOpen] = useState(false);
   const { toast } = useToast();
 
   const handleCreateTask = (taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => {
     const newTask: Task = {
       ...taskData,
       id: Date.now().toString(),
+      percentCompleted: taskData.percentCompleted || 0,
+      estimatedHours: taskData.estimatedHours || 0,
+      actualHours: taskData.actualHours || 0,
+      updateLog: taskData.updateLog || [],
+      relatedTasks: taskData.relatedTasks || [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -44,8 +51,20 @@ const Index = () => {
 
   const handleEditTask = (task: Task) => {
     setEditingTask(task);
-    // In a real app, this would open an edit dialog
-    console.log('Edit task:', task);
+    setTaskDetailOpen(true);
+  };
+
+  const handleUpdateTask = (taskId: string, updates: Partial<Task>) => {
+    setTasks(tasks.map(task => 
+      task.id === taskId 
+        ? { ...task, ...updates }
+        : task
+    ));
+    
+    toast({
+      title: "Task updated",
+      description: "Task has been successfully updated.",
+    });
   };
 
   return (
@@ -113,6 +132,14 @@ const Index = () => {
         onCreateTask={handleCreateTask}
         projects={mockProjects}
         teamMembers={mockTeamMembers}
+      />
+
+      <TaskDetailDialog
+        open={taskDetailOpen}
+        onOpenChange={setTaskDetailOpen}
+        task={editingTask}
+        allTasks={tasks}
+        onUpdateTask={handleUpdateTask}
       />
     </div>
   );

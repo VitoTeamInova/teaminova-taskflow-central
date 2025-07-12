@@ -61,6 +61,15 @@ export const mockTasks: Task[] = [
     assignee: 'Sarah Johnson',
     projectId: '1',
     dueDate: '2024-01-25T00:00:00Z',
+    startDate: '2024-01-15T00:00:00Z',
+    percentCompleted: 65,
+    estimatedHours: 20,
+    actualHours: 12.5,
+    updateLog: [
+      { timestamp: '2024-01-22T15:30:00Z', text: 'Completed initial wireframes and started working on responsive design' },
+      { timestamp: '2024-01-20T10:15:00Z', text: 'Research phase completed, moving to design phase' }
+    ],
+    relatedTasks: ['2'],
     createdAt: '2024-01-15T10:00:00Z',
     updatedAt: '2024-01-22T15:30:00Z'
   },
@@ -73,6 +82,12 @@ export const mockTasks: Task[] = [
     assignee: 'Mike Chen',
     projectId: '1',
     dueDate: '2024-01-30T00:00:00Z',
+    startDate: '2024-01-18T00:00:00Z',
+    percentCompleted: 0,
+    estimatedHours: 16,
+    actualHours: 0,
+    updateLog: [],
+    relatedTasks: ['1', '3'],
     createdAt: '2024-01-16T09:00:00Z',
     updatedAt: '2024-01-16T09:00:00Z'
   },
@@ -85,6 +100,16 @@ export const mockTasks: Task[] = [
     assignee: 'John Smith',
     projectId: '2',
     dueDate: '2024-01-20T00:00:00Z',
+    startDate: '2024-01-10T00:00:00Z',
+    percentCompleted: 100,
+    estimatedHours: 12,
+    actualHours: 14,
+    updateLog: [
+      { timestamp: '2024-01-19T16:45:00Z', text: 'Documentation completed and reviewed by team' },
+      { timestamp: '2024-01-15T11:20:00Z', text: 'Added examples for authentication endpoints' },
+      { timestamp: '2024-01-12T14:00:00Z', text: 'Initial draft of API documentation created' }
+    ],
+    relatedTasks: ['2'],
     createdAt: '2024-01-10T14:00:00Z',
     updatedAt: '2024-01-19T16:45:00Z'
   },
@@ -97,6 +122,15 @@ export const mockTasks: Task[] = [
     assignee: 'Mike Chen',
     projectId: '2',
     dueDate: '2024-01-24T00:00:00Z',
+    startDate: '2024-01-17T00:00:00Z',
+    percentCompleted: 25,
+    estimatedHours: 24,
+    actualHours: 8,
+    updateLog: [
+      { timestamp: '2024-01-22T10:15:00Z', text: 'Blocked waiting for server access permissions' },
+      { timestamp: '2024-01-19T09:30:00Z', text: 'Initial investigation started' }
+    ],
+    relatedTasks: [],
     createdAt: '2024-01-18T11:00:00Z',
     updatedAt: '2024-01-22T10:15:00Z'
   },
@@ -109,6 +143,14 @@ export const mockTasks: Task[] = [
     assignee: 'Emily Davis',
     projectId: '3',
     dueDate: '2024-02-05T00:00:00Z',
+    startDate: '2024-01-19T00:00:00Z',
+    percentCompleted: 10,
+    estimatedHours: 32,
+    actualHours: 3,
+    updateLog: [
+      { timestamp: '2024-01-20T13:00:00Z', text: 'Project planning phase started' }
+    ],
+    relatedTasks: [],
     createdAt: '2024-01-20T13:00:00Z',
     updatedAt: '2024-01-20T13:00:00Z'
   },
@@ -121,6 +163,15 @@ export const mockTasks: Task[] = [
     assignee: 'Sarah Johnson',
     projectId: '1',
     dueDate: '2024-01-28T00:00:00Z',
+    startDate: '2024-01-17T00:00:00Z',
+    percentCompleted: 40,
+    estimatedHours: 15,
+    actualHours: 6,
+    updateLog: [
+      { timestamp: '2024-01-21T14:20:00Z', text: 'Completed 4 out of 10 user interviews' },
+      { timestamp: '2024-01-18T16:00:00Z', text: 'User research plan finalized, interviews started' }
+    ],
+    relatedTasks: ['1'],
     createdAt: '2024-01-17T10:00:00Z',
     updatedAt: '2024-01-21T14:20:00Z'
   },
@@ -133,6 +184,12 @@ export const mockTasks: Task[] = [
     assignee: 'John Smith',
     projectId: '2',
     dueDate: '2024-02-01T00:00:00Z',
+    startDate: '2024-01-25T00:00:00Z',
+    percentCompleted: 0,
+    estimatedHours: 10,
+    actualHours: 0,
+    updateLog: [],
+    relatedTasks: ['3'],
     createdAt: '2024-01-19T08:30:00Z',
     updatedAt: '2024-01-19T08:30:00Z'
   },
@@ -145,6 +202,16 @@ export const mockTasks: Task[] = [
     assignee: 'Emily Davis',
     projectId: '3',
     dueDate: '2024-01-22T00:00:00Z',
+    startDate: '2024-01-12T00:00:00Z',
+    percentCompleted: 100,
+    estimatedHours: 8,
+    actualHours: 7.5,
+    updateLog: [
+      { timestamp: '2024-01-22T09:00:00Z', text: 'Email campaign successfully launched to all subscribers' },
+      { timestamp: '2024-01-20T14:30:00Z', text: 'Final testing completed, ready for launch' },
+      { timestamp: '2024-01-15T10:00:00Z', text: 'Email content and design approved' }
+    ],
+    relatedTasks: ['5'],
     createdAt: '2024-01-12T15:00:00Z',
     updatedAt: '2024-01-22T09:00:00Z'
   }
