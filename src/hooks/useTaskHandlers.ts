@@ -6,6 +6,7 @@ export function useTaskHandlers(
   createTask: (data: any) => Promise<any>,
   updateTask: (id: string, data: any) => Promise<any>,
   createUpdateLog: (taskId: string, text: string) => Promise<any>,
+  updateRelatedTasks: (taskId: string, relatedTaskIds: string[]) => Promise<any>,
   profiles: any[]
 ) {
   const { toast } = useToast();
@@ -108,10 +109,28 @@ export function useTaskHandlers(
     }
   };
 
+  const handleUpdateRelatedTasks = async (taskId: string, relatedTaskIds: string[]) => {
+    try {
+      await updateRelatedTasks(taskId, relatedTaskIds);
+      
+      toast({
+        title: "Related tasks updated",
+        description: "Task relationships have been successfully updated.",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error updating related tasks",
+        description: "Failed to update related tasks. Please try again.",
+      });
+    }
+  };
+
   return {
     handleCreateTask,
     handleStatusChange,
     handleUpdateTask,
-    handleAddUpdate
+    handleAddUpdate,
+    handleUpdateRelatedTasks
   };
 }

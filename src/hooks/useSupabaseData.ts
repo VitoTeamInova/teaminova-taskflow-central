@@ -28,6 +28,14 @@ export interface DatabaseTask {
     name: string;
     color: string;
   };
+  update_logs?: Array<{
+    id: string;
+    text: string;
+    created_at: string;
+  }>;
+  related_tasks?: Array<{
+    related_task_id: string;
+  }>;
 }
 
 export interface DatabaseProject {
@@ -79,7 +87,9 @@ export const useSupabaseData = () => {
       .select(`
         *,
         assignee:profiles!tasks_assignee_id_fkey(id, name, email),
-        project:projects(id, name, color)
+        project:projects(id, name, color),
+        update_logs:update_log(id, text, created_at),
+        related_tasks:related_tasks!related_tasks_task_id_fkey(related_task_id)
       `)
       .order('created_at', { ascending: false });
 
@@ -192,7 +202,45 @@ export const useSupabaseData = () => {
     }
 
     console.log('Update log created successfully:', data);
+    
+    // Refresh tasks to get updated data
+    await fetchTasks();
+    
     return data;
+  };
+
+  const updateRelatedTasks = async (taskId: string, relatedTaskIds: string[]) => {
+    if (!user) {
+      throw new Error('User must be authenticated to update related tasks');
+    }
+
+    // First, delete existing related tasks for this task
+    await supabase
+      .from('related_tasks')
+      .delete()
+      .eq('task_id', taskId);
+
+    // Then insert new related tasks
+    if (relatedTaskIds.length > 0) {
+      const { error } = await supabase
+        .from('related_tasks')
+        .insert(
+          relatedTaskIds.map(relatedTaskId => ({
+            task_id: taskId,
+            related_task_id: relatedTaskId
+          }))
+        );
+
+      if (error) {
+        console.error('Error updating related tasks:', error);
+        throw error;
+      }
+    }
+
+    // Refresh tasks to get updated data
+    await fetchTasks();
+    
+    return true;
   };
 
   const createProject = async (projectData: any) => {
@@ -244,6 +292,7 @@ export const useSupabaseData = () => {
     updateTask,
     createProject,
     createUpdateLog,
+    updateRelatedTasks,
     refetchTasks: fetchTasks,
     refetchProjects: fetchProjects,
     refetchProfiles: fetchProfiles,

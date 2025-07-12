@@ -2,10 +2,12 @@ import { Home, CheckSquare, Calendar, Users, BarChart3, Settings, FolderOpen, Pl
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Project, Task } from "@/types/task";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface SidebarProps {
   projects: Project[];
   tasks: Task[];
+  profiles: any[];
   activeView: string;
   onViewChange: (view: string) => void;
   onCreateProject?: () => void;
@@ -21,8 +23,17 @@ const getNavigationItems = (taskCount: number) => [
   { id: 'reports', label: 'Reports', icon: BarChart3 },
 ];
 
-export function Sidebar({ projects, tasks, activeView, onViewChange, onCreateProject, onSettingsClick }: SidebarProps) {
-  const navigationItems = getNavigationItems(tasks.length);
+export function Sidebar({ projects, tasks, profiles, activeView, onViewChange, onCreateProject, onSettingsClick }: SidebarProps) {
+  const { user } = useAuth();
+  
+  // Get current user's profile to filter assigned tasks
+  const currentUserProfile = profiles.find(p => p.user_id === user?.id);
+  const userTasks = tasks.filter(task => 
+    task.assignee === currentUserProfile?.name || 
+    (task as any).assignee_id === currentUserProfile?.id
+  );
+  
+  const navigationItems = getNavigationItems(userTasks.length);
   return (
     <aside className="w-64 border-r bg-card h-full">
       <div className="p-4">

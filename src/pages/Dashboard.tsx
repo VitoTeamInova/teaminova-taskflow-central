@@ -3,9 +3,11 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Clock, AlertTriangle, TrendingUp, Users, Calendar } from "lucide-react";
 import { Task, TaskStatus } from "@/types/task";
 import { useSupabaseData } from "@/hooks/useSupabaseData";
+import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
 
 const Dashboard = () => {
+  const { user } = useAuth();
   const { tasks, projects, profiles, loading } = useSupabaseData();
 
   // Convert database tasks to frontend format
@@ -74,8 +76,8 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background p-6 space-y-6">
       <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground rounded-lg p-6">
-        <h1 className="text-2xl font-bold">Welcome back, John!</h1>
-        <p className="text-primary-foreground/80">You have {convertedTasks.length} tasks in the system</p>
+        <h1 className="text-2xl font-bold">Welcome back, {profiles.find(p => p.user_id === user?.id)?.name || user?.user_metadata?.name || user?.email || 'User'}!</h1>
+        <p className="text-primary-foreground/80">You have {convertedTasks.filter(task => task.assignee === profiles.find(p => p.user_id === user?.id)?.name).length} assigned tasks</p>
       </div>
 
       {/* Statistics Cards */}

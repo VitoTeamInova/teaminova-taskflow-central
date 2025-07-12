@@ -3,6 +3,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Task, TaskPriority, TaskStatus } from "@/types/task";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 interface TaskCardProps {
   task: Task;
@@ -26,6 +28,20 @@ const statusColors = {
 };
 
 export function TaskCard({ task, onEdit, onStatusChange }: TaskCardProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: task.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
@@ -36,7 +52,15 @@ export function TaskCard({ task, onEdit, onStatusChange }: TaskCardProps) {
   const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'completed';
 
   return (
-    <Card className="group hover:shadow-md transition-all duration-200 cursor-pointer border-l-4 border-l-primary/20">
+    <Card 
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className={`group hover:shadow-md transition-all duration-200 cursor-pointer border-l-4 border-l-primary/20 ${
+        isDragging ? 'opacity-50 rotate-2 shadow-lg' : ''
+      }`}
+    >
       <CardContent className="p-4">
         <div className="flex items-start justify-between mb-3">
           <h3 

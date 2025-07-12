@@ -9,7 +9,8 @@ export function useAppData() {
     loading, 
     createTask, 
     updateTask,
-    createUpdateLog
+    createUpdateLog,
+    updateRelatedTasks
   } = useSupabaseData();
 
   // Convert database tasks to frontend format for backward compatibility
@@ -27,8 +28,11 @@ export function useAppData() {
     percentCompleted: task.percent_completed,
     estimatedHours: task.estimated_hours,
     actualHours: task.actual_hours,
-    updateLog: [], // TODO: Fetch from update_log table
-    relatedTasks: [], // TODO: Fetch from related_tasks table
+    updateLog: (task.update_logs || []).map((log: any) => ({
+      timestamp: log.created_at,
+      text: log.text
+    })),
+    relatedTasks: (task.related_tasks || []).map((rt: any) => rt.related_task_id),
     createdAt: task.created_at,
     updatedAt: task.updated_at,
   }));
@@ -69,6 +73,7 @@ export function useAppData() {
     loading,
     createTask,
     updateTask,
-    createUpdateLog
+    createUpdateLog,
+    updateRelatedTasks
   };
 }

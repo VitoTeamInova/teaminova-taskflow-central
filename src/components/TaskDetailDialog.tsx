@@ -23,17 +23,19 @@ interface TaskDetailDialogProps {
   teamMembers: TeamMember[];
   onUpdateTask: (taskId: string, updates: Partial<Task>) => void;
   onAddUpdate: (taskId: string, updateText: string) => void;
+  onUpdateRelatedTasks?: (taskId: string, relatedTaskIds: string[]) => void;
 }
 
 export function TaskDetailDialog({ 
   open, 
   onOpenChange, 
   task, 
-  allTasks,
-  projects,
-  teamMembers,
-  onUpdateTask,
-  onAddUpdate
+  allTasks, 
+  projects, 
+  teamMembers, 
+  onUpdateTask, 
+  onAddUpdate,
+  onUpdateRelatedTasks 
 }: TaskDetailDialogProps) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [updateLogOpen, setUpdateLogOpen] = useState(false);
@@ -123,10 +125,16 @@ export function TaskDetailDialog({
   };
 
   const handleUpdateRelatedTasks = (relatedTaskIds: string[]) => {
-    onUpdateTask(task.id, { 
-      relatedTasks: relatedTaskIds,
-      updatedAt: new Date().toISOString()
-    });
+    // Call the dedicated related tasks handler from props
+    if (onUpdateRelatedTasks) {
+      onUpdateRelatedTasks(task.id, relatedTaskIds);
+    } else {
+      // Fallback to the general update handler
+      onUpdateTask(task.id, { 
+        relatedTasks: relatedTaskIds,
+        updatedAt: new Date().toISOString()
+      });
+    }
   };
 
   const handleCancellation = (justification: string) => {

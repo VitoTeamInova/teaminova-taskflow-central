@@ -8,6 +8,7 @@ interface AppLayoutProps {
   children: ReactNode;
   projects: Project[];
   tasks: Task[];
+  profiles: any[];
   activeView: string;
   onViewChange: (view: string) => void;
   onCreateProject: () => void;
@@ -17,7 +18,8 @@ interface AppLayoutProps {
 export function AppLayout({ 
   children, 
   projects,
-  tasks, 
+  tasks,
+  profiles, 
   activeView, 
   onViewChange, 
   onCreateProject, 
@@ -32,6 +34,7 @@ export function AppLayout({
         <Sidebar 
           projects={projects}
           tasks={tasks}
+          profiles={profiles}
           activeView={activeView}
           onViewChange={onViewChange}
           onCreateProject={onCreateProject}
