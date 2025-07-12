@@ -81,7 +81,7 @@ export function CreateTaskDialog({
         
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 gap-4">
-            <div className="bg-blue-50/50 p-4 rounded-lg">
+            <div className="bg-blue-100/80 p-4 rounded-lg">
               <h4 className="font-medium mb-3 text-sm">Basic Information</h4>
               <div className="space-y-4">
                 <div>
@@ -110,7 +110,7 @@ export function CreateTaskDialog({
               </div>
             </div>
 
-            <div className="bg-blue-50/50 p-4 rounded-lg">
+            <div className="bg-blue-100/80 p-4 rounded-lg">
               <h4 className="font-medium mb-3 text-sm">Task Details</h4>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -152,7 +152,7 @@ export function CreateTaskDialog({
               </div>
             </div>
 
-            <div className="bg-blue-50/50 p-4 rounded-lg">
+            <div className="bg-blue-100/80 p-4 rounded-lg">
               <h4 className="font-medium mb-3 text-sm">Assignment</h4>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -195,7 +195,7 @@ export function CreateTaskDialog({
               </div>
             </div>
 
-            <div className="bg-blue-50/50 p-4 rounded-lg">
+            <div className="bg-blue-100/80 p-4 rounded-lg">
               <h4 className="font-medium mb-3 text-sm">Date Information</h4>
               <div className="grid grid-cols-3 gap-4">
                 <div>
@@ -234,7 +234,7 @@ export function CreateTaskDialog({
               </div>
             </div>
 
-            <div className="bg-blue-50/50 p-4 rounded-lg">
+            <div className="bg-blue-100/80 p-4 rounded-lg">
               <h4 className="font-medium mb-3 text-sm">Progress & Time Tracking</h4>
               <div className="grid grid-cols-3 gap-4">
                 <div>
@@ -280,11 +280,11 @@ export function CreateTaskDialog({
           </div>
 
           <div className="flex justify-end gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="bg-gray-100 hover:bg-gray-200">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="bg-blue-100 hover:bg-blue-200">
               Cancel
             </Button>
-            <Button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white">
-              Create Task
+            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
+              Save Task
             </Button>
           </div>
         </form>
