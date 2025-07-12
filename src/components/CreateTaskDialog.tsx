@@ -42,7 +42,9 @@ export function CreateTaskDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title.trim()) return;
+    if (!formData.title.trim() || !formData.projectId) {
+      return;
+    }
 
     onCreateTask({
       ...formData,
@@ -156,7 +158,7 @@ export function CreateTaskDialog({
               <h4 className="font-medium mb-3 text-sm">Assignment</h4>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Project</Label>
+                  <Label>Project *</Label>
                   <Select 
                     value={formData.projectId} 
                     onValueChange={(value) => setFormData({ ...formData, projectId: value })}
