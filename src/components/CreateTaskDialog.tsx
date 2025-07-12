@@ -188,7 +188,7 @@ export function CreateTaskDialog({
                     </SelectTrigger>
                     <SelectContent>
                       {teamMembers.map((member) => (
-                        <SelectItem key={member.id} value={member.name}>
+                        <SelectItem key={member.id} value={member.id}>
                           {member.name}
                         </SelectItem>
                       ))}

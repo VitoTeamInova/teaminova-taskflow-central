@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -9,12 +9,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Plus, Pencil, Trash2, Calendar, User, Target, CheckCircle, X } from "lucide-react";
-import { mockProjects, mockTeamMembers, mockTasks } from "@/data/mockData";
 import { Project, ProjectStatus, Milestone } from "@/types/task";
 import { useToast } from "@/hooks/use-toast";
+import { useSupabaseData } from "@/hooks/useSupabaseData";
+import { supabase } from "@/integrations/supabase/client";
 
 const Projects = () => {
-  const [projects, setProjects] = useState<Project[]>(mockProjects);
+  const { projects: dbProjects, profiles, tasks, createProject, loading } = useSupabaseData();
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -45,7 +46,7 @@ const Projects = () => {
     });
   };
 
-  const handleAddProject = () => {
+  const handleAddProject = async () => {
     if (!newProject.name || !newProject.projectManager) {
       toast({
         title: "Error",
@@ -55,48 +56,102 @@ const Projects = () => {
       return;
     }
 
-    const project: Project = {
-      id: Date.now().toString(),
-      ...newProject,
-      color: '#3B82F6',
-      createdAt: new Date().toISOString()
+    const projectData = {
+      name: newProject.name,
+      description: newProject.description || null,
+      status: newProject.status,
+      project_manager_id: newProject.projectManager,
+      start_date: newProject.startDate || null,
+      target_completion_date: newProject.targetCompletionDate || null,
+      actual_completion_date: newProject.actualCompletionDate || null,
+      color: '#3B82F6'
     };
 
-    setProjects([...projects, project]);
-    resetNewProject();
-    setIsAddDialogOpen(false);
-    
-    toast({
-      title: "Success",
-      description: `Project "${project.name}" has been created.`,
-    });
+    const project = await createProject(projectData);
+    if (project) {
+      // Handle milestones separately if any exist
+      if (newProject.milestones.length > 0) {
+        for (const milestone of newProject.milestones) {
+          await supabase.from('milestones').insert({
+            project_id: project.id,
+            title: milestone.title,
+            due_date: milestone.dueDate,
+            completed: milestone.completed
+          });
+        }
+      }
+      
+      resetNewProject();
+      setIsAddDialogOpen(false);
+      
+      toast({
+        title: "Success",
+        description: `Project "${project.name}" has been created.`,
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: "Failed to create project. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleEditProject = () => {
+  const handleEditProject = async () => {
     if (!editingProject) return;
 
-    setProjects(projects => 
-      projects.map(project => 
-        project.id === editingProject.id ? editingProject : project
-      )
-    );
-    setIsEditDialogOpen(false);
-    setEditingProject(null);
-    
-    toast({
-      title: "Success",
-      description: "Project updated successfully.",
-    });
+    const updateData = {
+      name: editingProject.name,
+      description: editingProject.description || null,
+      status: editingProject.status,
+      project_manager_id: editingProject.projectManager,
+      start_date: editingProject.startDate || null,
+      target_completion_date: editingProject.targetCompletionDate || null,
+      actual_completion_date: editingProject.actualCompletionDate || null,
+    };
+
+    const { error } = await supabase
+      .from('projects')
+      .update(updateData)
+      .eq('id', editingProject.id);
+
+    if (!error) {
+      setIsEditDialogOpen(false);
+      setEditingProject(null);
+      
+      toast({
+        title: "Success",
+        description: "Project updated successfully.",
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: "Failed to update project. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleDeleteProject = (projectId: string) => {
-    const project = projects.find(p => p.id === projectId);
-    setProjects(projects => projects.filter(p => p.id !== projectId));
+  const handleDeleteProject = async (projectId: string) => {
+    const project = dbProjects.find(p => p.id === projectId);
     
-    toast({
-      title: "Success",
-      description: `Project "${project?.name}" has been deleted.`,
-    });
+    const { error } = await supabase
+      .from('projects')
+      .delete()
+      .eq('id', projectId);
+
+    if (!error) {
+      toast({
+        title: "Success",
+        description: `Project "${project?.name}" has been deleted.`,
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: "Failed to delete project. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const addMilestone = (milestones: Milestone[], setMilestones: (milestones: Milestone[]) => void) => {
@@ -128,7 +183,7 @@ const Projects = () => {
   };
 
   const getProjectProgress = (projectId: string) => {
-    const projectTasks = mockTasks.filter(task => task.projectId === projectId);
+    const projectTasks = tasks.filter(task => task.project_id === projectId);
     if (projectTasks.length === 0) return 0;
     const completedTasks = projectTasks.filter(task => task.status === 'completed').length;
     return Math.round((completedTasks / projectTasks.length) * 100);
@@ -199,9 +254,9 @@ const Projects = () => {
                     <SelectValue placeholder="Select project manager" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockTeamMembers.map(member => (
+                    {profiles.map(member => (
                       <SelectItem key={member.id} value={member.id}>
-                        {member.name} - {member.role}
+                        {member.name} - {member.role || 'Team Member'}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -296,10 +351,10 @@ const Projects = () => {
 
       {/* Projects Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {projects.map(project => {
-          const manager = mockTeamMembers.find(m => m.id === project.projectManager);
+        {dbProjects.map(project => {
+          const manager = profiles.find(m => m.id === project.project_manager_id);
           const progress = getProjectProgress(project.id);
-          const completedMilestones = project.milestones.filter(m => m.completed).length;
+          const completedMilestones = 0; // TODO: implement milestones from database
           
           return (
             <Card key={project.id} className="bg-card/50 backdrop-blur hover:bg-card/70 transition-colors">
@@ -307,12 +362,12 @@ const Projects = () => {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <CardTitle className="text-lg mb-2">{project.name}</CardTitle>
-                    <Badge 
-                      variant={getStatusBadgeVariant(project.status)}
-                      className="w-fit"
-                    >
-                      {project.status.replace('-', ' ')}
-                    </Badge>
+                     <Badge 
+                       variant={getStatusBadgeVariant(project.status as ProjectStatus)}
+                       className="w-fit"
+                     >
+                       {project.status.replace('-', ' ')}
+                     </Badge>
                   </div>
                   <div 
                     className="w-4 h-4 rounded-full ml-2" 
@@ -327,20 +382,20 @@ const Projects = () => {
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center gap-2">
                     <User className="h-4 w-4 text-muted-foreground" />
-                    <span>{manager ? `${manager.name} (${manager.role})` : 'Unassigned'}</span>
+                    <span>{manager ? `${manager.name} (${manager.role || 'Team Member'})` : 'Unassigned'}</span>
                   </div>
                   
-                  {project.startDate && (
+                  {project.start_date && (
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <span>Started: {new Date(project.startDate).toLocaleDateString()}</span>
+                      <span>Started: {new Date(project.start_date).toLocaleDateString()}</span>
                     </div>
                   )}
                   
-                  {project.targetCompletionDate && (
+                  {project.target_completion_date && (
                     <div className="flex items-center gap-2">
                       <Target className="h-4 w-4 text-muted-foreground" />
-                      <span>Target: {new Date(project.targetCompletionDate).toLocaleDateString()}</span>
+                      <span>Target: {new Date(project.target_completion_date).toLocaleDateString()}</span>
                     </div>
                   )}
                 </div>
@@ -361,42 +416,31 @@ const Projects = () => {
                   </div>
                 </div>
 
-                {project.milestones.length > 0 && (
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span>Milestones</span>
-                      <span>{completedMilestones}/{project.milestones.length} completed</span>
-                    </div>
-                    <div className="space-y-1">
-                      {project.milestones.slice(0, 2).map(milestone => (
-                        <div key={milestone.id} className="flex items-center gap-2 text-xs">
-                          <CheckCircle className={`h-3 w-3 ${milestone.completed ? 'text-green-500' : 'text-muted-foreground'}`} />
-                          <span className={milestone.completed ? 'line-through text-muted-foreground' : ''}>
-                            {milestone.title}
-                          </span>
-                          <span className="text-muted-foreground ml-auto">
-                            {new Date(milestone.dueDate).toLocaleDateString()}
-                          </span>
-                        </div>
-                      ))}
-                      {project.milestones.length > 2 && (
-                        <div className="text-xs text-muted-foreground">
-                          +{project.milestones.length - 2} more milestones
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
+                {/* TODO: Implement milestones display from database */}
 
                 <div className="flex gap-2 pt-2">
                   <Button 
                     variant="outline" 
                     size="sm" 
                     className="flex-1"
-                    onClick={() => {
-                      setEditingProject({ ...project });
-                      setIsEditDialogOpen(true);
-                    }}
+                     onClick={() => {
+                       // Convert database project to local project format
+                       const localProject: Project = {
+                         id: project.id,
+                         name: project.name,
+                         description: project.description || '',
+                         status: project.status as ProjectStatus,
+                         projectManager: project.project_manager_id || '',
+                         startDate: project.start_date || '',
+                         targetCompletionDate: project.target_completion_date || '',
+                         actualCompletionDate: project.actual_completion_date || '',
+                         color: project.color,
+                         createdAt: project.created_at,
+                         milestones: []
+                       };
+                       setEditingProject(localProject);
+                       setIsEditDialogOpen(true);
+                     }}
                   >
                     <Pencil className="h-4 w-4 mr-1" />
                     Edit
@@ -467,9 +511,9 @@ const Projects = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockTeamMembers.map(member => (
+                    {profiles.map(member => (
                       <SelectItem key={member.id} value={member.id}>
-                        {member.name} - {member.role}
+                        {member.name} - {member.role || 'Team Member'}
                       </SelectItem>
                     ))}
                   </SelectContent>

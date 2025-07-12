@@ -38,7 +38,7 @@ const Index = () => {
         description: taskData.description,
         status: taskData.status,
         priority: taskData.priority,
-        assignee_id: taskData.assignee ? profiles.find(p => p.name === taskData.assignee)?.id : undefined,
+        assignee_id: taskData.assignee || null,
         project_id: taskData.projectId,
         due_date: taskData.dueDate,
         estimated_hours: taskData.estimatedHours || 0,
