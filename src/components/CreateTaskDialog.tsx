@@ -148,6 +148,7 @@ export function CreateTaskDialog({
                       <SelectItem value="completed">Completed</SelectItem>
                       <SelectItem value="on-hold">On Hold</SelectItem>
                       <SelectItem value="blocked">Blocked</SelectItem>
+                      <SelectItem value="cancelled">Cancelled</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

@@ -12,6 +12,7 @@ import { Calendar, Clock, User, BarChart3, Edit, Save, X } from "lucide-react";
 import { Task, UpdateLogEntry, TaskPriority, TaskStatus, Project, TeamMember } from "@/types/task";
 import { UpdateLogDialog } from "./UpdateLogDialog";
 import { RelatedTasksDialog } from "./RelatedTasksDialog";
+import { CancellationDialog } from "./CancellationDialog";
 
 interface TaskDetailDialogProps {
   open: boolean;
@@ -35,6 +36,7 @@ export function TaskDetailDialog({
   const [isEditMode, setIsEditMode] = useState(false);
   const [updateLogOpen, setUpdateLogOpen] = useState(false);
   const [relatedTasksOpen, setRelatedTasksOpen] = useState(false);
+  const [cancellationOpen, setCancellationOpen] = useState(false);
   const [formData, setFormData] = useState<Task | null>(null);
 
   useEffect(() => {
@@ -95,6 +97,12 @@ export function TaskDetailDialog({
 
   const handleSave = () => {
     if (formData) {
+      // Check if status is being changed to cancelled
+      if (formData.status === 'cancelled' && task.status !== 'cancelled') {
+        setCancellationOpen(true);
+        return;
+      }
+      
       onUpdateTask(task.id, {
         ...formData,
         updatedAt: new Date().toISOString()
@@ -128,6 +136,25 @@ export function TaskDetailDialog({
     });
   };
 
+  const handleCancellation = (justification: string) => {
+    if (formData) {
+      const newUpdate: UpdateLogEntry = {
+        timestamp: new Date().toISOString(),
+        text: `Task cancelled: ${justification}`
+      };
+      
+      const updatedLog = [newUpdate, ...task.updateLog];
+      
+      onUpdateTask(task.id, {
+        ...formData,
+        status: 'cancelled',
+        updateLog: updatedLog,
+        updatedAt: new Date().toISOString()
+      });
+      setIsEditMode(false);
+    }
+  };
+
   const projectTasks = allTasks.filter(t => t.projectId === task.projectId);
   const relatedTasksData = allTasks.filter(t => task.relatedTasks.includes(t.id));
   const currentProject = getProject(task.projectId);
@@ -145,7 +172,8 @@ export function TaskDetailDialog({
     'in-progress': 'bg-blue-100 text-blue-800',
     'completed': 'bg-green-100 text-green-800',
     'on-hold': 'bg-yellow-100 text-yellow-800',
-    'blocked': 'bg-red-100 text-red-800'
+    'blocked': 'bg-red-100 text-red-800',
+    'cancelled': 'bg-red-100 text-red-800'
   };
 
   return (
@@ -154,20 +182,22 @@ export function TaskDetailDialog({
         <DialogContent className="max-w-4xl max-h-[90vh]">
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2">
-                  {currentProject && (
-                    <Badge variant="outline" className="text-xs bg-purple-100 text-purple-800">
-                      {currentProject.name}
+              <div className="bg-blue-100/80 p-4 rounded-lg w-full mr-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    {currentProject && (
+                      <Badge variant="outline" className="text-sm bg-purple-100 text-purple-800">
+                        {currentProject.name}
+                      </Badge>
+                    )}
+                    <span className="text-lg font-semibold">{task.title}</span>
+                    <Badge variant="outline" className={`text-xs ${priorityColors[task.priority]}`}>
+                      {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
                     </Badge>
-                  )}
-                  <span>{task.title}</span>
-                  <Badge variant="outline" className={`text-xs ${priorityColors[task.priority]}`}>
-                    {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
-                  </Badge>
-                  <Badge variant="secondary" className={`text-xs ${statusColors[task.status]}`}>
-                    {task.status.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                  </Badge>
+                    <Badge variant="secondary" className={`text-xs ${statusColors[task.status]}`}>
+                      {task.status.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                    </Badge>
+                  </div>
                 </div>
               </div>
               
@@ -281,6 +311,7 @@ export function TaskDetailDialog({
                             <SelectItem value="completed">Completed</SelectItem>
                             <SelectItem value="on-hold">On Hold</SelectItem>
                             <SelectItem value="blocked">Blocked</SelectItem>
+                            <SelectItem value="cancelled">Cancelled</SelectItem>
                           </SelectContent>
                         </Select>
                       ) : (
@@ -336,9 +367,9 @@ export function TaskDetailDialog({
                             ))}
                           </SelectContent>
                         </Select>
-                      ) : (
-                        <p className="text-sm mt-1">{currentProject?.name || "No project assigned"}</p>
-                      )}
+                       ) : (
+                         <p className="text-sm mt-1">{currentProject?.name || "No project assigned"}</p>
+                       )}
                     </div>
                   </div>
                 </div>
@@ -589,6 +620,13 @@ export function TaskDetailDialog({
         currentTaskId={task.id}
         selectedRelatedTasks={task.relatedTasks}
         onSubmit={handleUpdateRelatedTasks}
+      />
+
+      <CancellationDialog
+        open={cancellationOpen}
+        onOpenChange={setCancellationOpen}
+        onSubmit={handleCancellation}
+        taskTitle={task.title}
       />
     </>
   );

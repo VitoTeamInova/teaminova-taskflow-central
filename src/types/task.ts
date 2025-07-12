@@ -1,4 +1,4 @@
-export type TaskStatus = 'todo' | 'in-progress' | 'completed' | 'on-hold' | 'blocked';
+export type TaskStatus = 'todo' | 'in-progress' | 'completed' | 'on-hold' | 'blocked' | 'cancelled';
 export type TaskPriority = 'low' | 'medium' | 'high' | 'critical';
 
 export interface UpdateLogEntry {
