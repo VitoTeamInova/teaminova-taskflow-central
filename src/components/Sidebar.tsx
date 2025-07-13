@@ -59,30 +59,19 @@ export function Sidebar({ projects, tasks, profiles, activeView, onViewChange, o
         <div className="mt-8">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              Projects
+              Projects Covered
             </h3>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-6 w-6 p-0"
-              onClick={onCreateProject}
-              title="Create new project"
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
           </div>
           
           <div className="space-y-1">
             {projects.map((project) => (
-              <Button
+              <div
                 key={project.id}
-                variant="ghost"
-                className="w-full justify-start h-9 text-sm"
-                onClick={() => onViewChange(`project-${project.id}`)}
+                className="w-full flex items-center h-9 text-sm px-3 py-2 text-muted-foreground"
               >
                 <FolderOpen className="h-4 w-4 mr-3" style={{ color: project.color }} />
                 <span className="truncate">{project.name}</span>
-              </Button>
+              </div>
             ))}
           </div>
         </div>

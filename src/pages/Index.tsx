@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { ViewRenderer } from "@/components/ViewRenderer";
@@ -19,6 +20,19 @@ const Index = () => {
     setCreateTaskOpen, 
     setTaskDetailOpen 
   } = useDialogState();
+
+  // Listen for custom events to open task detail from Team page
+  useEffect(() => {
+    const handleOpenTaskDetail = (event: CustomEvent) => {
+      openTaskDetail(event.detail);
+    };
+
+    window.addEventListener('openTaskDetail', handleOpenTaskDetail as EventListener);
+    
+    return () => {
+      window.removeEventListener('openTaskDetail', handleOpenTaskDetail as EventListener);
+    };
+  }, [openTaskDetail]);
   const { 
     activeView, 
     selectedProjectId, 

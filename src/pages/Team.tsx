@@ -364,35 +364,45 @@ const Team = () => {
                 <h4 className="font-medium mb-3">Assigned Tasks ({getMemberTasks(selectedMember.id).length})</h4>
                 <ScrollArea className="h-64">
                   <div className="space-y-2">
-                    {getMemberTasks(selectedMember.id).map(task => (
-                      <div key={task.id} className="p-3 bg-muted/30 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
-                        <div className="flex items-start justify-between mb-2">
-                          <h5 className="font-medium text-sm">{task.title}</h5>
-                          <Badge 
-                            variant={task.status === 'completed' ? 'default' : 'outline'}
-                            className="ml-2"
-                          >
-                            {task.status.replace('-', ' ')}
-                          </Badge>
-                        </div>
-                        <p className="text-xs text-muted-foreground mb-2">{task.description}</p>
-                        <div className="flex items-center justify-between text-xs">
-                          <Badge 
-                            variant={task.priority === 'critical' ? 'destructive' : task.priority === 'high' ? 'default' : 'secondary'}
-                          >
-                            {task.priority}
-                          </Badge>
-                          <div className="flex items-center gap-2">
-                            <span>{task.percent_completed}% complete</span>
-                            {task.due_date && (
-                              <span className="text-muted-foreground">
-                                Due: {new Date(task.due_date).toLocaleDateString()}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                     {getMemberTasks(selectedMember.id).map(task => (
+                       <div 
+                         key={task.id} 
+                         className="p-3 bg-muted/30 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                         onClick={() => {
+                           // Close member detail dialog and open task detail
+                           setIsMemberDetailOpen(false);
+                           // We need to pass this task to a task detail handler
+                           // For now, we'll add this functionality by importing the task detail dialog
+                           window.dispatchEvent(new CustomEvent('openTaskDetail', { detail: task }));
+                         }}
+                       >
+                         <div className="flex items-start justify-between mb-2">
+                           <h5 className="font-medium text-sm">{task.title}</h5>
+                           <Badge 
+                             variant={task.status === 'completed' ? 'default' : 'outline'}
+                             className="ml-2"
+                           >
+                             {task.status.replace('-', ' ')}
+                           </Badge>
+                         </div>
+                         <p className="text-xs text-muted-foreground mb-2">{task.description}</p>
+                         <div className="flex items-center justify-between text-xs">
+                           <Badge 
+                             variant={task.priority === 'critical' ? 'destructive' : task.priority === 'high' ? 'default' : 'secondary'}
+                           >
+                             {task.priority}
+                           </Badge>
+                           <div className="flex items-center gap-2">
+                             <span>{task.percent_completed}% complete</span>
+                             {task.due_date && (
+                               <span className="text-muted-foreground">
+                                 Due: {new Date(task.due_date).toLocaleDateString()}
+                               </span>
+                             )}
+                           </div>
+                         </div>
+                       </div>
+                     ))}
                   </div>
                 </ScrollArea>
               </div>

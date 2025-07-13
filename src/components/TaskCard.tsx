@@ -95,6 +95,14 @@ export function TaskCard({ task, onEdit, onStatusChange }: TaskCardProps) {
           </Badge>
         </div>
 
+        {(task as any).project && (
+          <div className="mb-3">
+            <Badge variant="outline" className="text-xs bg-muted/50">
+              {(task as any).project.name}
+            </Badge>
+          </div>
+        )}
+
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <div className="flex items-center gap-4">
             {task.assignee && (
