@@ -368,13 +368,33 @@ const Team = () => {
                        <div 
                          key={task.id} 
                          className="p-3 bg-muted/30 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
-                         onClick={() => {
-                           // Close member detail dialog and open task detail
-                           setIsMemberDetailOpen(false);
-                           // We need to pass this task to a task detail handler
-                           // For now, we'll add this functionality by importing the task detail dialog
-                           window.dispatchEvent(new CustomEvent('openTaskDetail', { detail: task }));
-                         }}
+                          onClick={() => {
+                            // Close member detail dialog and open task detail
+                            setIsMemberDetailOpen(false);
+                            // Convert database task format to frontend format for the event
+                            const frontendTask = {
+                              id: task.id,
+                              title: task.title,
+                              description: task.description || '',
+                              status: task.status,
+                              priority: task.priority,
+                              assignee: task.assignee?.name || '',
+                              assigneeId: task.assignee_id || '',
+                              projectId: task.project_id,
+                              dueDate: task.due_date || '',
+                              startDate: task.start_date || '',
+                              completionDate: task.completion_date || '',
+                              createdAt: task.created_at,
+                              updatedAt: task.updated_at,
+                              actualHours: task.actual_hours,
+                              estimatedHours: task.estimated_hours,
+                              percentCompleted: task.percent_completed,
+                              project: task.project,
+                              updateLogs: task.update_logs || [],
+                              relatedTasks: task.related_tasks?.map(rt => rt.related_task_id) || []
+                            };
+                            window.dispatchEvent(new CustomEvent('openTaskDetail', { detail: frontendTask }));
+                          }}
                        >
                          <div className="flex items-start justify-between mb-2">
                            <h5 className="font-medium text-sm">{task.title}</h5>

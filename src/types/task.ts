@@ -13,7 +13,13 @@ export interface Task {
   status: TaskStatus;
   priority: TaskPriority;
   assignee: string;
+  assigneeId?: string;
   projectId: string;
+  project?: {
+    id: string;
+    name: string;
+    color: string;
+  };
   dueDate?: string;
   startDate?: string;
   completionDate?: string;
@@ -21,6 +27,11 @@ export interface Task {
   estimatedHours: number;
   actualHours: number;
   updateLog: UpdateLogEntry[];
+  updateLogs?: Array<{
+    id: string;
+    text: string;
+    createdAt: string;
+  }>;
   relatedTasks: string[];
   createdAt: string;
   updatedAt: string;

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Task, TaskPriority, TaskStatus } from "@/types/task";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useEffect } from "react";
+
 
 interface TaskCardProps {
   task: Task;
@@ -52,15 +52,6 @@ export function TaskCard({ task, onEdit, onStatusChange }: TaskCardProps) {
 
   const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'completed';
 
-  // Debug logging
-  useEffect(() => {
-    console.log('TaskCard render:', { 
-      taskId: task.id, 
-      taskTitle: task.title, 
-      hasProject: !!(task as any).project,
-      projectName: (task as any).project?.name 
-    });
-  }, [task.id, task.title, (task as any).project]);
 
   return (
     <Card 
@@ -73,10 +64,10 @@ export function TaskCard({ task, onEdit, onStatusChange }: TaskCardProps) {
       }`}
     >
       <CardContent className="p-4">        
-        {(task as any).project && (
+        {task.project && (
           <div className="mb-2">
             <Badge variant="outline" className="text-xs bg-muted/50">
-              {(task as any).project.name}
+              {task.project.name}
             </Badge>
           </div>
         )}

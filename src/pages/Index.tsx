@@ -1,9 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { ViewRenderer } from "@/components/ViewRenderer";
 import { CreateTaskDialog } from "@/components/CreateTaskDialog";
 import { TaskDetailDialog } from "@/components/TaskDetailDialog";
+import { ProjectTasksDialog } from "@/components/ProjectTasksDialog";
 import { useAppData } from "@/hooks/useAppData";
 import { useDialogState } from "@/hooks/useDialogState";
 import { useViewNavigation } from "@/hooks/useViewNavigation";
@@ -20,17 +21,29 @@ const Index = () => {
     setCreateTaskOpen, 
     setTaskDetailOpen 
   } = useDialogState();
+  
+  const [selectedProject, setSelectedProject] = useState<any>(null);
+  const [projectTasks, setProjectTasks] = useState<any[]>([]);
+  const [isProjectTasksOpen, setIsProjectTasksOpen] = useState(false);
 
-  // Listen for custom events to open task detail from Team page
+  // Listen for custom events to open task detail from Team page and Projects page
   useEffect(() => {
     const handleOpenTaskDetail = (event: CustomEvent) => {
       openTaskDetail(event.detail);
     };
 
+    const handleOpenProjectTasks = (event: CustomEvent) => {
+      setSelectedProject(event.detail.project);
+      setProjectTasks(event.detail.tasks);
+      setIsProjectTasksOpen(true);
+    };
+
     window.addEventListener('openTaskDetail', handleOpenTaskDetail as EventListener);
+    window.addEventListener('openProjectTasks', handleOpenProjectTasks as EventListener);
     
     return () => {
       window.removeEventListener('openTaskDetail', handleOpenTaskDetail as EventListener);
+      window.removeEventListener('openProjectTasks', handleOpenProjectTasks as EventListener);
     };
   }, [openTaskDetail]);
   const { 
@@ -96,6 +109,13 @@ const Index = () => {
         onUpdateTask={handleUpdateTask}
         onAddUpdate={handleAddUpdate}
         onUpdateRelatedTasks={handleUpdateRelatedTasks}
+      />
+      
+      <ProjectTasksDialog
+        project={selectedProject}
+        tasks={projectTasks}
+        isOpen={isProjectTasksOpen}
+        onOpenChange={setIsProjectTasksOpen}
       />
     </>
   );

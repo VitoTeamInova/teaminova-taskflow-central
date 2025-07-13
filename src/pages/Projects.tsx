@@ -419,40 +419,60 @@ const Projects = () => {
                 {/* TODO: Implement milestones display from database */}
 
                 <div className="flex gap-2 pt-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="flex-1"
+                   <Button 
+                     variant="outline" 
+                     size="sm" 
+                     className="flex-1"
                      onClick={() => {
-                       // Convert database project to local project format
-                       const localProject: Project = {
-                         id: project.id,
-                         name: project.name,
-                         description: project.description || '',
-                         status: project.status as ProjectStatus,
-                         projectManager: project.project_manager_id || '',
-                         startDate: project.start_date || '',
-                         targetCompletionDate: project.target_completion_date || '',
-                         actualCompletionDate: project.actual_completion_date || '',
-                         color: project.color,
-                         createdAt: project.created_at,
-                         milestones: []
-                       };
-                       setEditingProject(localProject);
-                       setIsEditDialogOpen(true);
+                       // Create a dialog to view project tasks
+                       const projectTasks = tasks.filter(task => task.project_id === project.id);
+                       // We'll create a custom event to open task details similar to team page
+                       const projectTasksEvent = new CustomEvent('openProjectTasks', { 
+                         detail: { 
+                           project, 
+                           tasks: projectTasks 
+                         } 
+                       });
+                       window.dispatchEvent(projectTasksEvent);
                      }}
-                  >
-                    <Pencil className="h-4 w-4 mr-1" />
-                    Edit
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => handleDeleteProject(project.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
+                   >
+                     <User className="h-4 w-4 mr-1" />
+                     View Tasks
+                   </Button>
+                   <Button 
+                     variant="outline" 
+                     size="sm" 
+                     className="flex-1"
+                      onClick={() => {
+                        // Convert database project to local project format
+                        const localProject: Project = {
+                          id: project.id,
+                          name: project.name,
+                          description: project.description || '',
+                          status: project.status as ProjectStatus,
+                          projectManager: project.project_manager_id || '',
+                          startDate: project.start_date || '',
+                          targetCompletionDate: project.target_completion_date || '',
+                          actualCompletionDate: project.actual_completion_date || '',
+                          color: project.color,
+                          createdAt: project.created_at,
+                          milestones: []
+                        };
+                        setEditingProject(localProject);
+                        setIsEditDialogOpen(true);
+                      }}
+                   >
+                     <Pencil className="h-4 w-4 mr-1" />
+                     Edit
+                   </Button>
+                   <Button 
+                     variant="outline" 
+                     size="sm"
+                     onClick={() => handleDeleteProject(project.id)}
+                   >
+                     <Trash2 className="h-4 w-4" />
+                   </Button>
+                 </div>
               </CardContent>
             </Card>
           );

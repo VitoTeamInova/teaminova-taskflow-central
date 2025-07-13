@@ -21,7 +21,13 @@ export function useAppData() {
     status: task.status as TaskStatus,
     priority: task.priority as any,
     assignee: task.assignee?.name || '',
+    assigneeId: task.assignee_id || '',
     projectId: task.project_id,
+    project: task.project ? {
+      id: task.project.id,
+      name: task.project.name,
+      color: task.project.color
+    } : undefined,
     dueDate: task.due_date || undefined,
     startDate: task.start_date || undefined,
     completionDate: task.completion_date || undefined,
@@ -32,6 +38,11 @@ export function useAppData() {
       timestamp: log.created_at,
       text: log.text
     })),
+    updateLogs: task.update_logs?.map(log => ({
+      id: log.id,
+      text: log.text,
+      createdAt: log.created_at
+    })) || [],
     relatedTasks: (task.related_tasks || []).map((rt: any) => rt.related_task_id),
     createdAt: task.created_at,
     updatedAt: task.updated_at,
