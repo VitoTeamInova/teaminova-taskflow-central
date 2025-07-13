@@ -15,11 +15,11 @@ createRoot(document.getElementById("root")!).render(
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <ThemeProvider attribute="class" defaultTheme="light">
-          <AuthProvider>
-            <SettingsProvider>
+          <SettingsProvider>
+            <AuthProvider>
               <App />
-            </SettingsProvider>
-          </AuthProvider>
+            </AuthProvider>
+          </SettingsProvider>
         </ThemeProvider>
       </BrowserRouter>
     </QueryClientProvider>

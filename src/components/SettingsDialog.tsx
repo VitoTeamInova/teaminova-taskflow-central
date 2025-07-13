@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useSettings } from "@/contexts/SettingsContext";
+import { useTheme } from "next-themes";
 import { Project } from "@/types/task";
 
 interface SettingsDialogProps {
@@ -24,7 +25,8 @@ interface SettingsDialogProps {
 }
 
 export function SettingsDialog({ open, onOpenChange, projects }: SettingsDialogProps) {
-  const { defaultProjectId, setDefaultProjectId, theme, setTheme } = useSettings();
+  const { defaultProjectId, setDefaultProjectId } = useSettings();
+  const { theme, setTheme } = useTheme();
 
   const isDarkMode = theme === 'dark';
 

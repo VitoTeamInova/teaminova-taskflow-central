@@ -1,18 +1,14 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useTheme } from 'next-themes';
 
 interface SettingsContextType {
   defaultProjectId: string;
   setDefaultProjectId: (projectId: string) => void;
-  theme: string | undefined;
-  setTheme: (theme: string) => void;
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [defaultProjectId, setDefaultProjectIdState] = useState<string>('');
-  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     const saved = localStorage.getItem('defaultProjectId');
@@ -29,9 +25,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   return (
     <SettingsContext.Provider value={{
       defaultProjectId,
-      setDefaultProjectId,
-      theme,
-      setTheme
+      setDefaultProjectId
     }}>
       {children}
     </SettingsContext.Provider>
