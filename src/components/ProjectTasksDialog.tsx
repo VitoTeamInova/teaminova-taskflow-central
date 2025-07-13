@@ -90,8 +90,12 @@ export function ProjectTasksDialog({ isOpen, onOpenChange, project, tasks }: Pro
                           estimatedHours: task.estimated_hours,
                           percentCompleted: task.percent_completed,
                           project: task.project,
+                          updateLog: (task.update_logs || []).map((log: any) => ({
+                            timestamp: log.created_at,
+                            text: log.text
+                          })),
                           updateLogs: task.update_logs || [],
-                          relatedTasks: task.related_tasks?.map(rt => rt.related_task_id) || []
+                          relatedTasks: task.related_tasks?.map((rt: any) => rt.related_task_id) || []
                         };
                         window.dispatchEvent(new CustomEvent('openTaskDetail', { detail: frontendTask }));
                       }}
