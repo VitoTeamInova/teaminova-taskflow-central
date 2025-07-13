@@ -62,6 +62,14 @@ export function TaskCard({ task, onEdit, onStatusChange }: TaskCardProps) {
       }`}
     >
       <CardContent className="p-4">
+        {(task as any).project && (
+          <div className="mb-2">
+            <Badge variant="outline" className="text-xs bg-muted/50">
+              {(task as any).project.name}
+            </Badge>
+          </div>
+        )}
+        
         <div className="flex items-start justify-between mb-3">
           <h3 
             className="font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors"
@@ -95,13 +103,6 @@ export function TaskCard({ task, onEdit, onStatusChange }: TaskCardProps) {
           </Badge>
         </div>
 
-        {(task as any).project && (
-          <div className="mb-3">
-            <Badge variant="outline" className="text-xs bg-muted/50">
-              {(task as any).project.name}
-            </Badge>
-          </div>
-        )}
 
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <div className="flex items-center gap-4">
