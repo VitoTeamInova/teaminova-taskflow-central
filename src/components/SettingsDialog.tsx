@@ -76,12 +76,12 @@ export function SettingsDialog({ open, onOpenChange, projects }: SettingsDialogP
             <p className="text-xs text-muted-foreground">
               Set a default project for new tasks. This can be changed when creating tasks.
             </p>
-            <Select value={defaultProjectId} onValueChange={setDefaultProjectId}>
+            <Select value={defaultProjectId || "none"} onValueChange={(value) => setDefaultProjectId(value === "none" ? "" : value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Select a default project" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">No default project</SelectItem>
+                <SelectItem value="none">No default project</SelectItem>
                 {projects.map((project) => (
                   <SelectItem key={project.id} value={project.id}>
                     {project.name}
