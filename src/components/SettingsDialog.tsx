@@ -28,11 +28,17 @@ export function SettingsDialog({ open, onOpenChange, projects }: SettingsDialogP
   const { defaultProjectId, setDefaultProjectId } = useSettings();
   const { theme, setTheme } = useTheme();
 
+  // Add safety check for theme
   const isDarkMode = theme === 'dark';
+  const effectiveTheme = theme || 'light';
 
   const handleThemeToggle = (checked: boolean) => {
+    console.log('Theme toggle clicked, checked:', checked);
     setTheme(checked ? 'dark' : 'light');
   };
+
+  // Debug logging
+  console.log('SettingsDialog render:', { open, theme, isDarkMode, projects: projects.length });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
