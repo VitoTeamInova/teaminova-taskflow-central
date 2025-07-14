@@ -51,6 +51,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          access_level: string | null
           avatar: string | null
           created_at: string
           email: string
@@ -61,6 +62,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          access_level?: string | null
           avatar?: string | null
           created_at?: string
           email: string
@@ -71,6 +73,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          access_level?: string | null
           avatar?: string | null
           created_at?: string
           email?: string

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -14,9 +14,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useTheme } from "next-themes";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Project } from "@/types/task";
+import { UserManagement } from "./UserManagement";
 
 interface SettingsDialogProps {
   open: boolean;
@@ -27,6 +31,9 @@ interface SettingsDialogProps {
 export function SettingsDialog({ open, onOpenChange, projects }: SettingsDialogProps) {
   const { defaultProjectId, setDefaultProjectId } = useSettings();
   const { theme, setTheme } = useTheme();
+  const { user } = useAuth();
+  const [showUserManagement, setShowUserManagement] = useState(false);
+  const [currentUserProfile, setCurrentUserProfile] = useState<any>(null);
 
   // Add safety check for theme
   const isDarkMode = theme === 'dark';
@@ -37,17 +44,47 @@ export function SettingsDialog({ open, onOpenChange, projects }: SettingsDialogP
     setTheme(checked ? 'dark' : 'light');
   };
 
+  // Fetch current user profile to check access level
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (user) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+        setCurrentUserProfile(data);
+      }
+    };
+    fetchUserProfile();
+  }, [user]);
+
+  // Check if user has admin access
+  const isAdmin = currentUserProfile?.email === 'vito@teaminova.com' || currentUserProfile?.access_level === 'admin';
+
   // Debug logging
   console.log('SettingsDialog render:', { open, theme, isDarkMode, projects: projects.length });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className={showUserManagement ? "sm:max-w-[800px]" : "sm:max-w-[425px]"}>
         <DialogHeader>
           <DialogTitle>Settings</DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-6 py-4">
+        {showUserManagement ? (
+          <div className="space-y-4">
+            <Button
+              variant="ghost"
+              onClick={() => setShowUserManagement(false)}
+              className="mb-4"
+            >
+              ← Back to Settings
+            </Button>
+            <UserManagement />
+          </div>
+        ) : (
+          <div className="space-y-6 py-4">
           {/* Dark/Light Mode Toggle */}
           <div className="space-y-2">
             <Label htmlFor="theme-toggle" className="text-sm font-medium">
@@ -90,7 +127,27 @@ export function SettingsDialog({ open, onOpenChange, projects }: SettingsDialogP
               </SelectContent>
             </Select>
           </div>
+
+          {/* User Management - Only show for admins */}
+          {isAdmin && (
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">
+                Administration
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                Manage user accounts and permissions.
+              </p>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => setShowUserManagement(true)}
+              >
+                Manage User Accounts
+              </Button>
+            </div>
+          )}
         </div>
+        )}
       </DialogContent>
     </Dialog>
   );
