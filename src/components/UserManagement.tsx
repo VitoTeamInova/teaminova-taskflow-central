@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Trash2, Mail } from 'lucide-react';
+import { Loader2, Trash2, Mail, Shield, ShieldCheck } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,6 +17,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface Profile {
   id: string;
@@ -61,9 +62,8 @@ export function UserManagement() {
   const sendPasswordReset = async (email: string, userId: string) => {
     setActionLoading(userId);
     try {
-      const { error } = await supabase.auth.admin.generateLink({
-        type: 'recovery',
-        email: email,
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth?mode=reset`,
       });
 
       if (error) throw error;
@@ -86,18 +86,13 @@ export function UserManagement() {
   const deleteUser = async (userId: string, userEmail: string) => {
     setActionLoading(userId);
     try {
-      // First delete the profile
+      // Only delete the profile - this will trigger auth user deletion via RLS
       const { error: profileError } = await supabase
         .from('profiles')
         .delete()
         .eq('user_id', userId);
 
       if (profileError) throw profileError;
-
-      // Then delete the auth user
-      const { error: authError } = await supabase.auth.admin.deleteUser(userId);
-
-      if (authError) throw authError;
 
       toast({
         title: "User deleted",
@@ -110,6 +105,34 @@ export function UserManagement() {
       toast({
         variant: "destructive",
         title: "Error deleting user",
+        description: error.message,
+      });
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const updateUserAccessLevel = async (userId: string, newAccessLevel: string) => {
+    setActionLoading(userId);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ access_level: newAccessLevel })
+        .eq('user_id', userId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Access level updated",
+        description: `User access level changed to ${newAccessLevel}`,
+      });
+
+      // Refresh the users list
+      await fetchUsers();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error updating access level",
         description: error.message,
       });
     } finally {
@@ -167,6 +190,32 @@ export function UserManagement() {
               </p>
             </div>
             <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
+                <Select
+                  value={profile.access_level || 'user'}
+                  onValueChange={(value) => updateUserAccessLevel(profile.user_id, value)}
+                  disabled={actionLoading === profile.user_id || profile.user_id === user?.id}
+                >
+                  <SelectTrigger className="w-24 h-8">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="user">
+                      <div className="flex items-center gap-1">
+                        <Shield className="h-3 w-3" />
+                        User
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="admin">
+                      <div className="flex items-center gap-1">
+                        <ShieldCheck className="h-3 w-3" />
+                        Admin
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               <Button
                 variant="outline"
                 size="sm"
