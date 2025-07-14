@@ -27,8 +27,13 @@ const Auth = () => {
 
   useEffect(() => {
     const modeParam = searchParams.get('mode');
-    if (modeParam === 'reset') {
+    const accessToken = searchParams.get('access_token');
+    const refreshToken = searchParams.get('refresh_token');
+    
+    if (modeParam === 'reset' && accessToken && refreshToken) {
       setMode('update-password');
+    } else if (modeParam === 'reset') {
+      setMode('reset');
     }
   }, [searchParams]);
 

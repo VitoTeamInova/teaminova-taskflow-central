@@ -50,7 +50,7 @@ export function UserManagement() {
       <CardHeader>
         <CardTitle>User Management</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 max-h-96 overflow-y-auto">
         {users.map((profile) => (
           <UserCard
             key={profile.id}
