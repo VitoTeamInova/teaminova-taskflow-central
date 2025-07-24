@@ -31,6 +31,7 @@ export function ViewRenderer({
         <TaskBoard
           tasks={tasks}
           onEditTask={onEditTask}
+          onViewTask={onEditTask}
           onStatusChange={onStatusChange}
           onCreateTask={onCreateTask}
         />
