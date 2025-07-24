@@ -1,4 +1,4 @@
-import { Calendar, User, Clock, MoreHorizontal, Eye, Edit } from "lucide-react";
+import { Calendar, User, Clock, MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ interface TaskCardProps {
   onEdit: (task: Task) => void;
   onView?: (task: Task) => void;
   onStatusChange: (taskId: string, status: TaskStatus) => void;
+  onDelete?: (taskId: string) => void;
 }
 
 const priorityColors = {
@@ -30,7 +31,7 @@ const statusColors = {
   'blocked': 'bg-red-100 text-red-800'
 };
 
-export function TaskCard({ task, onEdit, onView, onStatusChange }: TaskCardProps) {
+export function TaskCard({ task, onEdit, onView, onStatusChange, onDelete }: TaskCardProps) {
   const {
     attributes,
     listeners,
@@ -95,6 +96,15 @@ export function TaskCard({ task, onEdit, onView, onStatusChange }: TaskCardProps
                 <Edit className="mr-2 h-4 w-4" />
                 Edit
               </DropdownMenuItem>
+              {onDelete && (
+                <DropdownMenuItem 
+                  onClick={() => onDelete(task.id)}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

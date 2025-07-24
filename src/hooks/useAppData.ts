@@ -9,6 +9,10 @@ export function useAppData() {
     loading, 
     createTask, 
     updateTask,
+    deleteTask,
+    createProject,
+    updateProject,
+    deleteProject,
     createUpdateLog,
     updateRelatedTasks
   } = useSupabaseData();
@@ -84,6 +88,10 @@ export function useAppData() {
     loading,
     createTask,
     updateTask,
+    deleteTask,
+    createProject,
+    updateProject,
+    deleteProject,
     createUpdateLog,
     updateRelatedTasks
   };

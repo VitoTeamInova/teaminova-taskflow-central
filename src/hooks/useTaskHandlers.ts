@@ -5,6 +5,7 @@ import { useSettings } from "@/contexts/SettingsContext";
 export function useTaskHandlers(
   createTask: (data: any) => Promise<any>,
   updateTask: (id: string, data: any) => Promise<any>,
+  deleteTask: (id: string) => Promise<any>,
   createUpdateLog: (taskId: string, text: string) => Promise<any>,
   updateRelatedTasks: (taskId: string, relatedTaskIds: string[]) => Promise<any>,
   profiles: any[]
@@ -73,8 +74,8 @@ export function useTaskHandlers(
       if (updates.percentCompleted !== undefined) dbUpdates.percent_completed = updates.percentCompleted;
       if (updates.estimatedHours !== undefined) dbUpdates.estimated_hours = updates.estimatedHours;
       if (updates.actualHours !== undefined) dbUpdates.actual_hours = updates.actualHours;
-      if (updates.assignee) {
-        dbUpdates.assignee_id = profiles.find(p => p.name === updates.assignee)?.id;
+      if (updates.assignee !== undefined) {
+        dbUpdates.assignee_id = updates.assignee ? profiles.find(p => p.name === updates.assignee)?.id : null;
       }
 
       await updateTask(taskId, dbUpdates);
@@ -126,11 +127,29 @@ export function useTaskHandlers(
     }
   };
 
+  const handleDeleteTask = async (taskId: string) => {
+    try {
+      await deleteTask(taskId);
+      
+      toast({
+        title: "Task deleted",
+        description: "Task has been successfully deleted.",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error deleting task",
+        description: "Failed to delete task. Please try again.",
+      });
+    }
+  };
+
   return {
     handleCreateTask,
     handleStatusChange,
     handleUpdateTask,
     handleAddUpdate,
-    handleUpdateRelatedTasks
+    handleUpdateRelatedTasks,
+    handleDeleteTask
   };
 }

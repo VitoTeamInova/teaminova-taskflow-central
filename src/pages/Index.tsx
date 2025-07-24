@@ -11,7 +11,7 @@ import { useViewNavigation } from "@/hooks/useViewNavigation";
 import { useTaskHandlers } from "@/hooks/useTaskHandlers";
 
 const Index = () => {
-  const { tasks, projects, profiles, loading, createTask, updateTask, createUpdateLog, updateRelatedTasks } = useAppData();
+  const { tasks, projects, profiles, loading, createTask, updateTask, deleteTask, createProject, updateProject, deleteProject, createUpdateLog, updateRelatedTasks } = useAppData();
   const { 
     createTaskOpen, 
     editingTask, 
@@ -58,8 +58,9 @@ const Index = () => {
     handleStatusChange, 
     handleUpdateTask,
     handleAddUpdate,
-    handleUpdateRelatedTasks
-  } = useTaskHandlers(createTask, updateTask, createUpdateLog, updateRelatedTasks, profiles);
+    handleUpdateRelatedTasks,
+    handleDeleteTask
+  } = useTaskHandlers(createTask, updateTask, deleteTask, createUpdateLog, updateRelatedTasks, profiles);
 
   if (loading) {
     return (
@@ -84,10 +85,15 @@ const Index = () => {
           activeView={activeView}
           selectedProjectId={selectedProjectId}
           tasks={tasks}
+          projects={projects}
+          profiles={profiles}
           onEditTask={openTaskDetail}
           onStatusChange={handleStatusChange}
           onCreateTask={openCreateTask}
           onBackToProjects={() => setActiveView('projects')}
+          updateProject={updateProject}
+          deleteProject={deleteProject}
+          deleteTask={deleteTask}
         />
       </AppLayout>
 

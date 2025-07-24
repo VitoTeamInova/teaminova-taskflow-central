@@ -271,6 +271,72 @@ export const useSupabaseData = () => {
     return data;
   };
 
+  const updateProject = async (projectId: string, updates: any) => {
+    const { data, error } = await supabase
+      .from('projects')
+      .update(updates)
+      .eq('id', projectId)
+      .select(`
+        *,
+        project_manager:profiles!projects_project_manager_id_fkey(id, name, email),
+        milestones(id, title, due_date, completed)
+      `)
+      .single();
+
+    if (error) {
+      console.error('Error updating project:', error);
+      throw error;
+    }
+
+    setProjects(prev => prev.map(project => project.id === projectId ? data : project));
+    return data;
+  };
+
+  const deleteProject = async (projectId: string) => {
+    // First check if there are any tasks associated with this project
+    const { data: tasks, error: tasksError } = await supabase
+      .from('tasks')
+      .select('id')
+      .eq('project_id', projectId);
+
+    if (tasksError) {
+      console.error('Error checking project tasks:', tasksError);
+      throw tasksError;
+    }
+
+    if (tasks && tasks.length > 0) {
+      throw new Error(`Cannot delete project. There are ${tasks.length} task(s) associated with this project. Please delete the tasks first.`);
+    }
+
+    const { error } = await supabase
+      .from('projects')
+      .delete()
+      .eq('id', projectId);
+
+    if (error) {
+      console.error('Error deleting project:', error);
+      throw error;
+    }
+
+    setProjects(prev => prev.filter(project => project.id !== projectId));
+    return true;
+  };
+
+  const deleteTask = async (taskId: string) => {
+    const { error } = await supabase
+      .from('tasks')
+      .delete()
+      .eq('id', taskId);
+
+    if (error) {
+      console.error('Error deleting task:', error);
+      throw error;
+    }
+
+    setTasks(prev => prev.filter(task => task.id !== taskId));
+    return true;
+  };
+
   useEffect(() => {
     if (user) {
       Promise.all([
@@ -290,7 +356,10 @@ export const useSupabaseData = () => {
     loading,
     createTask,
     updateTask,
+    deleteTask,
     createProject,
+    updateProject,
+    deleteProject,
     createUpdateLog,
     updateRelatedTasks,
     refetchTasks: fetchTasks,

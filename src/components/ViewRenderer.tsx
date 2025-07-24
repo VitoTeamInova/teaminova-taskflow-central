@@ -10,20 +10,30 @@ interface ViewRendererProps {
   activeView: string;
   selectedProjectId: string | null;
   tasks: Task[];
+  projects: any[];
+  profiles: any[];
   onEditTask: (task: Task) => void;
   onStatusChange: (taskId: string, status: TaskStatus) => void;
   onCreateTask: () => void;
   onBackToProjects: () => void;
+  updateProject: (projectId: string, updates: any) => Promise<any>;
+  deleteProject: (projectId: string) => Promise<boolean>;
+  deleteTask: (taskId: string) => Promise<boolean>;
 }
 
 export function ViewRenderer({
   activeView,
   selectedProjectId,
   tasks,
+  projects,
+  profiles,
   onEditTask,
   onStatusChange,
   onCreateTask,
-  onBackToProjects
+  onBackToProjects,
+  updateProject,
+  deleteProject,
+  deleteTask
 }: ViewRendererProps) {
   switch (activeView) {
     case 'tasks':
@@ -34,6 +44,7 @@ export function ViewRenderer({
           onViewTask={onEditTask}
           onStatusChange={onStatusChange}
           onCreateTask={onCreateTask}
+          onDeleteTask={deleteTask}
         />
       );
     case 'dashboard':
@@ -49,6 +60,12 @@ export function ViewRenderer({
         <ProjectDetail 
           projectId={selectedProjectId} 
           onBack={onBackToProjects}
+          projects={projects}
+          profiles={profiles}
+          tasks={tasks}
+          updateProject={updateProject}
+          deleteProject={deleteProject}
+          deleteTask={deleteTask}
         />
       ) : null;
     case 'reports':

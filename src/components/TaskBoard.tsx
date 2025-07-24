@@ -27,6 +27,7 @@ interface TaskBoardProps {
   onViewTask?: (task: Task) => void;
   onStatusChange: (taskId: string, status: TaskStatus) => void;
   onCreateTask: () => void;
+  onDeleteTask?: (taskId: string) => void;
 }
 
 const columns = [
@@ -41,7 +42,7 @@ function DroppableColumn({ status, children }: { status: TaskStatus; children: R
   return <div ref={setNodeRef}>{children}</div>;
 }
 
-export function TaskBoard({ tasks, onEditTask, onViewTask, onStatusChange, onCreateTask }: TaskBoardProps) {
+export function TaskBoard({ tasks, onEditTask, onViewTask, onStatusChange, onCreateTask, onDeleteTask }: TaskBoardProps) {
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   
   const sensors = useSensors(
@@ -132,13 +133,14 @@ export function TaskBoard({ tasks, onEditTask, onViewTask, onStatusChange, onCre
                   <DroppableColumn status={column.status}>
                     <div className="flex-1 space-y-3 overflow-y-auto min-h-[150px] p-2 rounded-lg border-2 border-dashed border-muted-foreground/20">
                     {columnTasks.map((task) => (
-                          <TaskCard
-                            key={task.id}
-                            task={task}
-                            onEdit={onEditTask}
-                            onView={onViewTask}
-                            onStatusChange={onStatusChange}
-                          />
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    onEdit={onEditTask}
+                    onView={onViewTask}
+                    onStatusChange={onStatusChange}
+                    onDelete={onDeleteTask}
+                  />
                     ))}
                     
                     {columnTasks.length === 0 && (
@@ -161,6 +163,7 @@ export function TaskBoard({ tasks, onEditTask, onViewTask, onStatusChange, onCre
             task={activeTask}
             onEdit={onEditTask}
             onStatusChange={onStatusChange}
+            onDelete={onDeleteTask}
           />
         ) : null}
       </DragOverlay>

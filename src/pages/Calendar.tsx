@@ -20,6 +20,7 @@ const Calendar = () => {
   const taskHandlers = useTaskHandlers(
     createTask,
     updateTask,
+    () => Promise.resolve(true), // deleteTask placeholder
     createUpdateLog,
     updateRelatedTasks,
     profiles

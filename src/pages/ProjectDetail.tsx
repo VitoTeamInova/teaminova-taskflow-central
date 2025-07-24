@@ -7,17 +7,22 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Edit, X, Plus, CheckCircle, Calendar, User, Target, BarChart3 } from "lucide-react";
-import { mockProjects, mockTeamMembers, mockTasks } from "@/data/mockData";
+import { ArrowLeft, Edit, X, Plus, CheckCircle, Calendar, User, Target, BarChart3, Trash2 } from "lucide-react";
 import { Project, ProjectStatus, Milestone } from "@/types/task";
 import { useToast } from "@/hooks/use-toast";
 
 interface ProjectDetailProps {
   projectId: string;
   onBack: () => void;
+  projects: any[];
+  profiles: any[];
+  tasks: any[];
+  updateProject: (projectId: string, updates: any) => Promise<any>;
+  deleteProject: (projectId: string) => Promise<boolean>;
+  deleteTask: (taskId: string) => Promise<boolean>;
 }
 
-const ProjectDetail = ({ projectId, onBack }: ProjectDetailProps) => {
+const ProjectDetail = ({ projectId, onBack, projects, profiles, tasks, updateProject, deleteProject, deleteTask }: ProjectDetailProps) => {
   const [project, setProject] = useState<Project | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<Project | null>(null);
@@ -25,27 +30,47 @@ const ProjectDetail = ({ projectId, onBack }: ProjectDetailProps) => {
   const { toast } = useToast();
 
   useEffect(() => {
-    const foundProject = mockProjects.find(p => p.id === projectId);
+    const foundProject = projects.find(p => p.id === projectId);
     if (foundProject) {
       setProject(foundProject);
       setEditForm(foundProject);
     }
-  }, [projectId]);
+  }, [projectId, projects]);
 
   const handleEdit = () => {
     setIsEditing(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!editForm) return;
     
-    setProject(editForm);
-    setIsEditing(false);
-    
-    toast({
-      title: "Success",
-      description: "Project updated successfully.",
-    });
+    try {
+      // Convert frontend format to database format
+      const updates = {
+        name: editForm.name,
+        description: editForm.description,
+        status: editForm.status,
+        project_manager_id: profiles.find(p => p.id === editForm.projectManager)?.id,
+        start_date: editForm.startDate,
+        target_completion_date: editForm.targetCompletionDate,
+        actual_completion_date: editForm.actualCompletionDate,
+      };
+
+      await updateProject(projectId, updates);
+      setProject(editForm);
+      setIsEditing(false);
+      
+      toast({
+        title: "Success",
+        description: "Project updated successfully.",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error updating project",
+        description: "Failed to update project. Please try again.",
+      });
+    }
   };
 
   const handleClose = () => {
@@ -54,6 +79,24 @@ const ProjectDetail = ({ projectId, onBack }: ProjectDetailProps) => {
       setIsEditing(false);
     } else {
       onBack();
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deleteProject(projectId);
+      
+      toast({
+        title: "Success",
+        description: "Project deleted successfully.",
+      });
+      onBack(); // Go back to projects list
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error deleting project",
+        description: error.message || "Failed to delete project. Please try again.",
+      });
     }
   };
 
@@ -103,7 +146,7 @@ const ProjectDetail = ({ projectId, onBack }: ProjectDetailProps) => {
   };
 
   const getProjectProgress = () => {
-    const projectTasks = mockTasks.filter(task => task.projectId === projectId);
+    const projectTasks = tasks.filter(task => task.projectId === projectId);
     if (projectTasks.length === 0) return 0;
     const completedTasks = projectTasks.filter(task => task.status === 'completed').length;
     return Math.round((completedTasks / projectTasks.length) * 100);
@@ -123,10 +166,10 @@ const ProjectDetail = ({ projectId, onBack }: ProjectDetailProps) => {
     );
   }
 
-  const manager = mockTeamMembers.find(m => m.id === (editForm?.projectManager || project.projectManager));
+  const manager = profiles.find(m => m.id === (editForm?.projectManager || project.projectManager));
   const progress = getProjectProgress();
   const completedMilestones = project.milestones.filter(m => m.completed).length;
-  const projectTasks = mockTasks.filter(task => task.projectId === projectId);
+  const projectTasks = tasks.filter(task => task.projectId === projectId);
 
   return (
     <div className="min-h-screen bg-background p-6">
@@ -148,10 +191,20 @@ const ProjectDetail = ({ projectId, onBack }: ProjectDetailProps) => {
               Save Changes
             </Button>
           ) : (
-            <Button onClick={handleEdit} variant="outline">
-              <Edit className="h-4 w-4 mr-2" />
-              Edit Project
-            </Button>
+            <>
+              <Button onClick={handleEdit} variant="outline">
+                <Edit className="h-4 w-4 mr-2" />
+                Edit Project
+              </Button>
+              <Button 
+                onClick={handleDelete} 
+                variant="destructive"
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete Project
+              </Button>
+            </>
           )}
         </div>
       </div>
@@ -232,7 +285,7 @@ const ProjectDetail = ({ projectId, onBack }: ProjectDetailProps) => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {mockTeamMembers.map(member => (
+                      {profiles.map(member => (
                         <SelectItem key={member.id} value={member.id}>
                           {member.name} - {member.role}
                         </SelectItem>
