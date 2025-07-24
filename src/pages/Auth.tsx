@@ -29,11 +29,17 @@ const Auth = () => {
     const modeParam = searchParams.get('mode');
     const type = searchParams.get('type');
     const token = searchParams.get('token');
+    const accessToken = searchParams.get('access_token');
+    const refreshToken = searchParams.get('refresh_token');
+    
+    console.log('Auth page params:', { modeParam, type, token, accessToken, refreshToken });
     
     // Check if this is a password recovery link from email
-    if (type === 'recovery' || (modeParam === 'reset' && token)) {
+    if (type === 'recovery' || (accessToken && refreshToken) || (modeParam === 'reset' && token)) {
+      console.log('Setting mode to update-password');
       setMode('update-password');
     } else if (modeParam === 'reset') {
+      console.log('Setting mode to reset');
       setMode('reset');
     }
   }, [searchParams]);

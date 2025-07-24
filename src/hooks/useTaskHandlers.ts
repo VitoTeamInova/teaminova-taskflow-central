@@ -47,7 +47,16 @@ export function useTaskHandlers(
 
   const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
     try {
-      console.log('Updating task status:', taskId, newStatus);
+      console.log('Updating task status:', { taskId, newStatus, taskIdType: typeof taskId, newStatusType: typeof newStatus });
+      
+      // Validate inputs
+      if (!taskId || typeof taskId !== 'string') {
+        throw new Error('Invalid task ID provided');
+      }
+      if (!newStatus || typeof newStatus !== 'string') {
+        throw new Error('Invalid status provided');
+      }
+      
       await updateTask(taskId, { status: newStatus });
       
       toast({
@@ -59,7 +68,7 @@ export function useTaskHandlers(
       toast({
         variant: "destructive",
         title: "Error updating task",
-        description: "Failed to update task status. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to update task status. Please try again.",
       });
     }
   };
