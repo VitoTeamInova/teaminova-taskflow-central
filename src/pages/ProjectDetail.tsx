@@ -56,6 +56,7 @@ const ProjectDetail = ({ projectId, onBack, projects, profiles, tasks, updatePro
         actual_completion_date: editForm.actualCompletionDate,
       };
 
+      console.log('Updating project with data:', updates);
       await updateProject(projectId, updates);
       setProject(editForm);
       setIsEditing(false);
@@ -65,6 +66,7 @@ const ProjectDetail = ({ projectId, onBack, projects, profiles, tasks, updatePro
         description: "Project updated successfully.",
       });
     } catch (error) {
+      console.error('Project update error:', error);
       toast({
         variant: "destructive",
         title: "Error updating project",

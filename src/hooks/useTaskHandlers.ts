@@ -47,6 +47,7 @@ export function useTaskHandlers(
 
   const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
     try {
+      console.log('Updating task status:', taskId, newStatus);
       await updateTask(taskId, { status: newStatus });
       
       toast({
@@ -54,6 +55,7 @@ export function useTaskHandlers(
         description: `Task status changed to ${newStatus.replace('-', ' ')}.`,
       });
     } catch (error) {
+      console.error('Task status update error:', error);
       toast({
         variant: "destructive",
         title: "Error updating task",
@@ -66,11 +68,13 @@ export function useTaskHandlers(
     try {
       // Convert frontend updates to database format
       const dbUpdates: any = {};
-      if (updates.title) dbUpdates.title = updates.title;
-      if (updates.description) dbUpdates.description = updates.description;
-      if (updates.status) dbUpdates.status = updates.status;
-      if (updates.priority) dbUpdates.priority = updates.priority;
-      if (updates.dueDate) dbUpdates.due_date = updates.dueDate;
+      if (updates.title !== undefined) dbUpdates.title = updates.title;
+      if (updates.description !== undefined) dbUpdates.description = updates.description;
+      if (updates.status !== undefined) dbUpdates.status = updates.status;
+      if (updates.priority !== undefined) dbUpdates.priority = updates.priority;
+      if (updates.dueDate !== undefined) dbUpdates.due_date = updates.dueDate;
+      if (updates.startDate !== undefined) dbUpdates.start_date = updates.startDate;
+      if (updates.completionDate !== undefined) dbUpdates.completion_date = updates.completionDate;
       if (updates.percentCompleted !== undefined) dbUpdates.percent_completed = updates.percentCompleted;
       if (updates.estimatedHours !== undefined) dbUpdates.estimated_hours = updates.estimatedHours;
       if (updates.actualHours !== undefined) dbUpdates.actual_hours = updates.actualHours;
@@ -78,6 +82,7 @@ export function useTaskHandlers(
         dbUpdates.assignee_id = updates.assignee ? profiles.find(p => p.name === updates.assignee)?.id : null;
       }
 
+      console.log('Updating task with data:', dbUpdates);
       await updateTask(taskId, dbUpdates);
       
       toast({
@@ -85,6 +90,7 @@ export function useTaskHandlers(
         description: "Task has been successfully updated.",
       });
     } catch (error) {
+      console.error('Task update error:', error);
       toast({
         variant: "destructive",
         title: "Error updating task",
