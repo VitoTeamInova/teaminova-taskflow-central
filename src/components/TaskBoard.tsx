@@ -24,6 +24,7 @@ import { useState } from "react";
 interface TaskBoardProps {
   tasks: Task[];
   onEditTask: (task: Task) => void;
+  onViewTask?: (task: Task) => void;
   onStatusChange: (taskId: string, status: TaskStatus) => void;
   onCreateTask: () => void;
 }
@@ -40,7 +41,7 @@ function DroppableColumn({ status, children }: { status: TaskStatus; children: R
   return <div ref={setNodeRef}>{children}</div>;
 }
 
-export function TaskBoard({ tasks, onEditTask, onStatusChange, onCreateTask }: TaskBoardProps) {
+export function TaskBoard({ tasks, onEditTask, onViewTask, onStatusChange, onCreateTask }: TaskBoardProps) {
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   
   const sensors = useSensors(
@@ -131,12 +132,13 @@ export function TaskBoard({ tasks, onEditTask, onStatusChange, onCreateTask }: T
                   <DroppableColumn status={column.status}>
                     <div className="flex-1 space-y-3 overflow-y-auto min-h-[150px] p-2 rounded-lg border-2 border-dashed border-muted-foreground/20">
                     {columnTasks.map((task) => (
-                      <TaskCard
-                        key={task.id}
-                        task={task}
-                        onEdit={onEditTask}
-                        onStatusChange={onStatusChange}
-                      />
+                          <TaskCard
+                            key={task.id}
+                            task={task}
+                            onEdit={onEditTask}
+                            onView={onViewTask}
+                            onStatusChange={onStatusChange}
+                          />
                     ))}
                     
                     {columnTasks.length === 0 && (

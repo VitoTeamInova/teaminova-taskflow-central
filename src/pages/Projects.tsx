@@ -116,6 +116,8 @@ const Projects = () => {
       .eq('id', editingProject.id);
 
     if (!error) {
+      // Trigger data refresh to show updated information immediately
+      window.location.reload();
       setIsEditDialogOpen(false);
       setEditingProject(null);
       
@@ -135,12 +137,26 @@ const Projects = () => {
   const handleDeleteProject = async (projectId: string) => {
     const project = dbProjects.find(p => p.id === projectId);
     
+    // Check if project has tasks
+    const projectTasks = tasks.filter(task => task.project_id === projectId);
+    
+    if (projectTasks.length > 0) {
+      toast({
+        title: "Cannot delete project",
+        description: `This project has ${projectTasks.length} task${projectTasks.length !== 1 ? 's' : ''} associated with it. Please delete or reassign the tasks before deleting the project.`,
+        variant: "destructive"
+      });
+      return;
+    }
+    
     const { error } = await supabase
       .from('projects')
       .delete()
       .eq('id', projectId);
 
     if (!error) {
+      // Trigger data refresh to show updated list immediately
+      window.location.reload();
       toast({
         title: "Success",
         description: `Project "${project?.name}" has been deleted.`,

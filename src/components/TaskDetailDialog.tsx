@@ -112,6 +112,8 @@ export function TaskDetailDialog({
         updatedAt: new Date().toISOString()
       });
       setIsEditMode(false);
+      // Close the dialog after saving
+      onOpenChange(false);
     }
   };
 
@@ -216,7 +218,7 @@ export function TaskDetailDialog({
                     </Button>
                     <Button onClick={handleSave} size="sm" className="bg-blue-500 hover:bg-blue-600 text-white">
                       <Save className="h-4 w-4 mr-1" />
-                      Save
+                      Save and Exit
                     </Button>
                     <Button onClick={handleCancel} variant="outline" size="sm" className="bg-gray-100 hover:bg-gray-200">
                       <X className="h-4 w-4 mr-1" />

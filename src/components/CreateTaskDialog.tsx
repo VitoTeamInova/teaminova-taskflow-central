@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Task, TaskPriority, TaskStatus, Project, TeamMember } from "@/types/task";
+import { useToast } from "@/hooks/use-toast";
 import { CalendarIcon } from "lucide-react";
 
 interface CreateTaskDialogProps {
@@ -23,6 +24,7 @@ export function CreateTaskDialog({
   projects, 
   teamMembers 
 }: CreateTaskDialogProps) {
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -42,7 +44,18 @@ export function CreateTaskDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title.trim() || !formData.projectId) {
+    
+    const missingFields = [];
+    if (!formData.title.trim()) missingFields.push("Title");
+    if (!formData.description.trim()) missingFields.push("Description");
+    if (!formData.projectId) missingFields.push("Project");
+    
+    if (missingFields.length > 0) {
+      toast({
+        title: "Save failed",
+        description: `Please fill in the following required fields: ${missingFields.join(", ")}`,
+        variant: "destructive"
+      });
       return;
     }
 
@@ -99,7 +112,7 @@ export function CreateTaskDialog({
                 </div>
 
                 <div>
-                  <Label htmlFor="description">Description</Label>
+                  <Label htmlFor="description">Description *</Label>
                   <Textarea
                     id="description"
                     value={formData.description}
@@ -107,6 +120,7 @@ export function CreateTaskDialog({
                     placeholder="Describe the task..."
                     className="mt-1"
                     rows={3}
+                    required
                   />
                 </div>
               </div>

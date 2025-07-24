@@ -7,11 +7,23 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Task } from "@/types/task";
 import { format, isSameDay, addMonths, subMonths, startOfMonth, endOfMonth } from "date-fns";
 import { useAppData } from "@/hooks/useAppData";
+import { TaskDetailDialog } from "@/components/TaskDetailDialog";
+import { useTaskHandlers } from "@/hooks/useTaskHandlers";
 
 const Calendar = () => {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
-  const { tasks, loading } = useAppData();
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
+  const { tasks, projects, profiles, loading, createTask, updateTask, createUpdateLog, updateRelatedTasks } = useAppData();
+  
+  const taskHandlers = useTaskHandlers(
+    createTask,
+    updateTask,
+    createUpdateLog,
+    updateRelatedTasks,
+    profiles
+  );
 
   // Get tasks for selected date
   const getTasksForDate = (selectedDate: Date) => {
@@ -210,17 +222,24 @@ const Calendar = () => {
                 ) : (
                   selectedDateTasks.map(task => {
                     const formattedTask = formatTaskForCalendar(task);
-                    return (
-                      <div key={task.id} className="p-3 rounded-lg bg-muted/30 space-y-2">
-                        <div className="flex items-start justify-between">
-                          <h4 className="font-medium text-sm">{formattedTask.title}</h4>
-                          <Badge 
-                            variant={task.status === 'completed' ? 'default' : 'outline'}
-                            className="ml-2"
-                          >
-                            {task.status.replace('-', ' ')}
-                          </Badge>
-                        </div>
+                     return (
+                       <div 
+                         key={task.id} 
+                         className="p-3 rounded-lg bg-muted/30 space-y-2 cursor-pointer hover:bg-muted/50 transition-colors"
+                         onClick={() => {
+                           setSelectedTask(task);
+                           setIsTaskDialogOpen(true);
+                         }}
+                       >
+                         <div className="flex items-start justify-between">
+                           <h4 className="font-medium text-sm">{formattedTask.title}</h4>
+                           <Badge 
+                             variant={task.status === 'completed' ? 'default' : 'outline'}
+                             className="ml-2"
+                           >
+                             {task.status.replace('-', ' ')}
+                           </Badge>
+                         </div>
                         
                         <div className="flex items-center justify-between text-xs text-muted-foreground">
                           <span>{task.assignee}</span>
@@ -281,26 +300,55 @@ const Calendar = () => {
             {tasks
               .filter(task => task.dueDate && task.status !== 'completed')
               .sort((a, b) => new Date(a.dueDate!).getTime() - new Date(b.dueDate!).getTime())
-              .slice(0, 6)
-              .map(task => (
-                <div key={task.id} className="p-3 rounded-lg bg-muted/30 space-y-2">
-                  <h4 className="font-medium text-sm">
-                    {task.title.length > 40 ? task.title.substring(0, 40) + '...' : task.title}
-                  </h4>
-                  <div className="flex items-center justify-between text-xs">
-                    <Badge variant="outline">{task.status.replace('-', ' ')}</Badge>
-                    <span className="text-muted-foreground">
-                      {task.dueDate ? format(new Date(task.dueDate), 'MMM d') : 'No due date'}
-                    </span>
-                  </div>
-                  <div className="text-xs text-muted-foreground">{task.assignee}</div>
-                </div>
-              ))}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-};
+               .slice(0, 6)
+               .map(task => (
+                 <div 
+                   key={task.id} 
+                   className="p-3 rounded-lg bg-muted/30 space-y-2 cursor-pointer hover:bg-muted/50 transition-colors"
+                   onClick={() => {
+                     setSelectedTask(task);
+                     setIsTaskDialogOpen(true);
+                   }}
+                 >
+                   <h4 className="font-medium text-sm">
+                     {task.title.length > 40 ? task.title.substring(0, 40) + '...' : task.title}
+                   </h4>
+                   <div className="flex items-center justify-between text-xs">
+                     <Badge variant="outline">{task.status.replace('-', ' ')}</Badge>
+                     <span className="text-muted-foreground">
+                       {task.dueDate ? format(new Date(task.dueDate), 'MMM d') : 'No due date'}
+                     </span>
+                   </div>
+                   <div className="text-xs text-muted-foreground">{task.assignee}</div>
+                 </div>
+               ))}
+           </div>
+         </CardContent>
+       </Card>
 
-export default Calendar;
+       {/* Task Detail Dialog */}
+       {selectedTask && (
+         <TaskDetailDialog
+           open={isTaskDialogOpen}
+           onOpenChange={setIsTaskDialogOpen}
+           task={selectedTask}
+           allTasks={tasks}
+           projects={projects}
+           teamMembers={profiles.map(p => ({ 
+             id: p.id, 
+             name: p.name, 
+             email: p.email, 
+             role: p.role || 'member',
+             avatar: p.avatar || '',
+             photo: p.avatar || ''
+           }))}
+           onUpdateTask={taskHandlers.handleUpdateTask}
+           onAddUpdate={taskHandlers.handleAddUpdate}
+           onUpdateRelatedTasks={taskHandlers.handleUpdateRelatedTasks}
+         />
+       )}
+     </div>
+   );
+ };
+ 
+ export default Calendar;

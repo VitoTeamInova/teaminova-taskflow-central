@@ -1,7 +1,8 @@
-import { Calendar, User, Clock, MoreHorizontal } from "lucide-react";
+import { Calendar, User, Clock, MoreHorizontal, Eye, Edit } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Task, TaskPriority, TaskStatus } from "@/types/task";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -10,6 +11,7 @@ import { CSS } from "@dnd-kit/utilities";
 interface TaskCardProps {
   task: Task;
   onEdit: (task: Task) => void;
+  onView?: (task: Task) => void;
   onStatusChange: (taskId: string, status: TaskStatus) => void;
 }
 
@@ -28,7 +30,7 @@ const statusColors = {
   'blocked': 'bg-red-100 text-red-800'
 };
 
-export function TaskCard({ task, onEdit, onStatusChange }: TaskCardProps) {
+export function TaskCard({ task, onEdit, onView, onStatusChange }: TaskCardProps) {
   const {
     attributes,
     listeners,
@@ -73,15 +75,28 @@ export function TaskCard({ task, onEdit, onStatusChange }: TaskCardProps) {
         )}
         
         <div className="flex items-start justify-between mb-3">
-          <h3 
-            className="font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors"
-            onClick={() => onEdit(task)}
-          >
+          <h3 className="font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors">
             {task.title}
           </h3>
-          <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0">
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {onView && (
+                <DropdownMenuItem onClick={() => onView(task)}>
+                  <Eye className="mr-2 h-4 w-4" />
+                  View
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem onClick={() => onEdit(task)}>
+                <Edit className="mr-2 h-4 w-4" />
+                Edit
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {task.description && (
