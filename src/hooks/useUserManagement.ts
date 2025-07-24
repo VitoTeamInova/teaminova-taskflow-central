@@ -56,13 +56,12 @@ export function useUserManagement() {
   const deleteUser = async (userId: string, userEmail: string) => {
     setActionLoading(userId);
     try {
-      // Only delete the profile - this will trigger auth user deletion via RLS
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('user_id', userId);
+      // Use the admin function to properly delete the user
+      const { error: deleteError } = await supabase.rpc('admin_delete_user', {
+        user_id_to_delete: userId
+      });
 
-      if (profileError) throw profileError;
+      if (deleteError) throw deleteError;
 
       toast({
         title: "User deleted",

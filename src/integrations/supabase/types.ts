@@ -271,6 +271,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_delete_user: {
+        Args: { user_id_to_delete: string }
+        Returns: boolean
+      }
       is_admin: {
         Args: { user_uuid?: string }
         Returns: boolean
