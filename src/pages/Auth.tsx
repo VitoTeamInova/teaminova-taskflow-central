@@ -27,10 +27,11 @@ const Auth = () => {
 
   useEffect(() => {
     const modeParam = searchParams.get('mode');
-    const accessToken = searchParams.get('access_token');
-    const refreshToken = searchParams.get('refresh_token');
+    const type = searchParams.get('type');
+    const token = searchParams.get('token');
     
-    if (modeParam === 'reset' && accessToken && refreshToken) {
+    // Check if this is a password recovery link from email
+    if (type === 'recovery' || (modeParam === 'reset' && token)) {
       setMode('update-password');
     } else if (modeParam === 'reset') {
       setMode('reset');
