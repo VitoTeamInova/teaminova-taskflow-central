@@ -31,15 +31,24 @@ const Auth = () => {
     const token = searchParams.get('token');
     const accessToken = searchParams.get('access_token');
     const refreshToken = searchParams.get('refresh_token');
-    
-    console.log('Auth page params:', { modeParam, type, token, accessToken, refreshToken });
-    
-    // Check if this is a password recovery link from email
-    if (type === 'recovery' || (accessToken && refreshToken) || (modeParam === 'reset' && token)) {
-      console.log('Setting mode to update-password');
+
+    // Also parse URL hash for Supabase implicit flow tokens
+    const hash = window.location.hash?.startsWith('#') ? window.location.hash.slice(1) : '';
+    const hashParams = new URLSearchParams(hash);
+    const hashType = hashParams.get('type');
+    const hashAccessToken = hashParams.get('access_token');
+    const hashRefreshToken = hashParams.get('refresh_token');
+
+    // Decide which UI to show
+    if (
+      modeParam === 'update-password' ||
+      type === 'recovery' ||
+      hashType === 'recovery' ||
+      ((accessToken && refreshToken) || (hashAccessToken && hashRefreshToken)) ||
+      (modeParam === 'reset' && token)
+    ) {
       setMode('update-password');
     } else if (modeParam === 'reset') {
-      console.log('Setting mode to reset');
       setMode('reset');
     }
   }, [searchParams]);
