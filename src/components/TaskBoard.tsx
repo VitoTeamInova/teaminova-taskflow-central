@@ -135,7 +135,7 @@ export function TaskBoard({ tasks, projects = [], onEditTask, onViewTask, onStat
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="h-full p-6">
+      <div className="h-full flex flex-col p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-2xl font-bold text-foreground">Task Board</h2>
@@ -176,7 +176,7 @@ export function TaskBoard({ tasks, projects = [], onEditTask, onViewTask, onStat
           </Select>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 h-[calc(100vh-200px)]">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 flex-1 overflow-y-auto">
           {columns.map((column) => {
             const columnTasks = getTasksByStatus(column.status);
             

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { ViewRenderer } from "@/components/ViewRenderer";
@@ -11,6 +12,7 @@ import { useViewNavigation } from "@/hooks/useViewNavigation";
 import { useTaskHandlers } from "@/hooks/useTaskHandlers";
 
 const Index = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { tasks, projects, profiles, loading, createTask, updateTask, deleteTask, createProject, updateProject, deleteProject, createUpdateLog, updateRelatedTasks } = useAppData();
   const { 
     createTaskOpen, 
@@ -26,6 +28,19 @@ const Index = () => {
   const [selectedProject, setSelectedProject] = useState<any>(null);
   const [projectTasks, setProjectTasks] = useState<any[]>([]);
   const [isProjectTasksOpen, setIsProjectTasksOpen] = useState(false);
+
+  // Handle taskId from URL query parameter
+  useEffect(() => {
+    const taskId = searchParams.get('taskId');
+    if (taskId && tasks.length > 0) {
+      const task = tasks.find(t => t.id === taskId);
+      if (task) {
+        openTaskDetail(task, false);
+        // Remove the taskId from URL after opening
+        setSearchParams({});
+      }
+    }
+  }, [searchParams, tasks, openTaskDetail, setSearchParams]);
 
   // Listen for custom events to open task detail from Team page and Projects page
   useEffect(() => {
