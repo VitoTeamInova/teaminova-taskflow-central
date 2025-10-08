@@ -171,11 +171,15 @@ export const useSupabaseData = () => {
         assignee:profiles!tasks_assignee_id_fkey(id, name, email),
         project:projects(id, name, color)
       `)
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error('Error updating task:', error);
       throw error;
+    }
+
+    if (!data) {
+      throw new Error('Task not found or you do not have permission to update it');
     }
 
     setTasks(prev => prev.map(task => task.id === taskId ? data : task));
