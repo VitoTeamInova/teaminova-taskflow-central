@@ -214,8 +214,6 @@ export const useSupabaseData = () => {
       console.error('Error creating update log:', error);
       throw error;
     }
-
-    console.log('Update log created successfully:', data);
     
     // Refresh tasks to get updated data
     await fetchTasks();
@@ -262,9 +260,6 @@ export const useSupabaseData = () => {
       throw new Error('User must be authenticated to create projects');
     }
 
-    console.log('Creating project with data:', projectData);
-    console.log('Current user:', user.id);
-
     const { data, error } = await supabase
       .from('projects')
       .insert(projectData)
@@ -280,7 +275,6 @@ export const useSupabaseData = () => {
       throw error;
     }
 
-    console.log('Project created successfully:', data);
     setProjects(prev => [data, ...prev]);
     return data;
   };
@@ -357,7 +351,11 @@ export const useSupabaseData = () => {
         fetchTasks(),
         fetchProjects(),
         fetchProfiles()
-      ]).finally(() => setLoading(false));
+      ])
+        .catch(error => {
+          console.error('Error fetching data:', error);
+        })
+        .finally(() => setLoading(false));
     } else {
       setLoading(false);
     }
