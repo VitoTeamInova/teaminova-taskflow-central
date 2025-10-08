@@ -8,10 +8,11 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Plus, Pencil, Trash2, User, Mail, Briefcase } from "lucide-react";
+import { Plus, Pencil, Trash2, User, Mail, Briefcase, EyeOff } from "lucide-react";
 import { useSupabaseData } from "@/hooks/useSupabaseData";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { SecureEmail } from "@/components/SecureEmail";
 
 const Team = () => {
   const { profiles, tasks, loading, refetchProfiles } = useSupabaseData();
@@ -268,7 +269,7 @@ const Team = () => {
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Mail className="h-4 w-4" />
-                    {member.email}
+                    <SecureEmail email={member.email} userId={member.user_id} />
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Briefcase className="h-4 w-4" />
@@ -350,7 +351,8 @@ const Team = () => {
               <div className="bg-muted/20 p-4 rounded-lg">
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="font-medium">Email:</span> {selectedMember.email}
+                    <span className="font-medium">Email:</span>{" "}
+                    <SecureEmail email={selectedMember.email} userId={selectedMember.user_id} showIcon={false} />
                   </div>
                   <div>
                     <span className="font-medium">Role:</span> {selectedMember.role}

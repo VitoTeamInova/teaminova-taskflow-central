@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Trash2, Mail, Shield, ShieldCheck } from 'lucide-react';
+import { Loader2, Trash2, Mail, Shield, ShieldCheck, Eye, EyeOff } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Profile } from '@/types/user';
+import { useEmailVisibility, maskEmail } from '@/hooks/useEmailVisibility';
 
 interface UserCardProps {
   profile: Profile;
@@ -33,6 +34,9 @@ export function UserCard({
   onDelete,
   onAccessLevelChange
 }: UserCardProps) {
+  const { canViewEmail } = useEmailVisibility(profile.user_id);
+  const displayEmail = canViewEmail ? profile.email : maskEmail(profile.email);
+
   return (
     <div className="flex items-center justify-between p-4 border rounded-lg">
       <div className="flex-1">
@@ -42,7 +46,14 @@ export function UserCard({
             {profile.access_level}
           </Badge>
         </div>
-        <p className="text-sm text-muted-foreground">{profile.email}</p>
+        <div className="flex items-center gap-2">
+          <p className="text-sm text-muted-foreground">{displayEmail}</p>
+          {!canViewEmail && (
+            <span title="Email hidden for privacy">
+              <EyeOff className="h-3 w-3 text-muted-foreground" />
+            </span>
+          )}
+        </div>
         <p className="text-xs text-muted-foreground">
           Joined: {new Date(profile.created_at).toLocaleDateString()}
         </p>
