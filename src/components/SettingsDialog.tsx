@@ -40,7 +40,6 @@ export function SettingsDialog({ open, onOpenChange, projects }: SettingsDialogP
   const effectiveTheme = theme || 'light';
 
   const handleThemeToggle = (checked: boolean) => {
-    console.log('Theme toggle clicked, checked:', checked);
     setTheme(checked ? 'dark' : 'light');
   };
 
@@ -61,9 +60,6 @@ export function SettingsDialog({ open, onOpenChange, projects }: SettingsDialogP
 
   // Check if user has admin access
   const isAdmin = currentUserProfile?.email === 'vito@teaminova.com' || currentUserProfile?.access_level === 'admin';
-
-  // Debug logging
-  console.log('SettingsDialog render:', { open, theme, isDarkMode, projects: projects.length });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

@@ -47,9 +47,6 @@ export function useTaskHandlers(
 
   const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
     try {
-      console.log('Updating task status:', { taskId, newStatus, taskIdType: typeof taskId, newStatusType: typeof newStatus });
-      
-      // Validate inputs
       if (!taskId || typeof taskId !== 'string') {
         throw new Error('Invalid task ID provided');
       }
@@ -87,11 +84,11 @@ export function useTaskHandlers(
       if (updates.percentCompleted !== undefined) dbUpdates.percent_completed = updates.percentCompleted;
       if (updates.estimatedHours !== undefined) dbUpdates.estimated_hours = updates.estimatedHours;
       if (updates.actualHours !== undefined) dbUpdates.actual_hours = updates.actualHours;
+      if (updates.reference_url !== undefined) dbUpdates.reference_url = updates.reference_url;
       if (updates.assignee !== undefined) {
         dbUpdates.assignee_id = updates.assignee ? profiles.find(p => p.name === updates.assignee)?.id : null;
       }
 
-      console.log('Updating task with data:', dbUpdates);
       await updateTask(taskId, dbUpdates);
       
       toast({

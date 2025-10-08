@@ -174,6 +174,7 @@ export type Database = {
           assignee_id: string | null
           completion_date: string | null
           created_at: string
+          created_by_profile_id: string | null
           description: string | null
           due_date: string | null
           estimated_hours: number
@@ -192,6 +193,7 @@ export type Database = {
           assignee_id?: string | null
           completion_date?: string | null
           created_at?: string
+          created_by_profile_id?: string | null
           description?: string | null
           due_date?: string | null
           estimated_hours?: number
@@ -210,6 +212,7 @@ export type Database = {
           assignee_id?: string | null
           completion_date?: string | null
           created_at?: string
+          created_by_profile_id?: string | null
           description?: string | null
           due_date?: string | null
           estimated_hours?: number
@@ -227,6 +230,13 @@ export type Database = {
           {
             foreignKeyName: "tasks_assignee_id_fkey"
             columns: ["assignee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_created_by_profile_id_fkey"
+            columns: ["created_by_profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]

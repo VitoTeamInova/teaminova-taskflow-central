@@ -13,6 +13,7 @@ import { Task, UpdateLogEntry, TaskPriority, TaskStatus, Project, TeamMember } f
 import { UpdateLogDialog } from "./UpdateLogDialog";
 import { RelatedTasksDialog } from "./RelatedTasksDialog";
 import { CancellationDialog } from "./CancellationDialog";
+import { useToast } from "@/hooks/use-toast";
 
 interface TaskDetailDialogProps {
   open: boolean;
@@ -39,6 +40,7 @@ export function TaskDetailDialog({
   onUpdateRelatedTasks,
   initialEditMode = false,
 }: TaskDetailDialogProps) {
+  const { toast } = useToast();
   const [isEditMode, setIsEditMode] = useState(false);
   const [updateLogOpen, setUpdateLogOpen] = useState(false);
   const [relatedTasksOpen, setRelatedTasksOpen] = useState(false);
@@ -559,16 +561,43 @@ useEffect(() => {
                     </p>
                   </div>
                 ) : (
-                  <div>
+                  <div className="space-y-2">
                     {task.reference_url ? (
-                      <a 
-                        href={task.reference_url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline text-sm break-all"
-                      >
-                        {task.reference_url}
-                      </a>
+                      <>
+                        <a 
+                          href={task.reference_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline text-sm break-all block"
+                        >
+                          {task.reference_url}
+                        </a>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              navigator.clipboard.writeText(task.reference_url || '');
+                              toast({ title: "Copied!", description: "Reference URL copied to clipboard" });
+                            }}
+                            className="text-xs"
+                          >
+                            Copy URL
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const subject = encodeURIComponent(`Task: ${task.title}`);
+                              const body = encodeURIComponent(`Reference URL: ${task.reference_url}`);
+                              window.location.href = `mailto:?subject=${subject}&body=${body}`;
+                            }}
+                            className="text-xs"
+                          >
+                            Share via Email
+                          </Button>
+                        </div>
+                      </>
                     ) : (
                       <span className="text-sm text-muted-foreground">No reference URL set</span>
                     )}

@@ -138,12 +138,23 @@ export const useSupabaseData = () => {
       throw new Error('User must be authenticated to create tasks');
     }
 
-    console.log('Creating task with data:', taskData);
-    console.log('Current user:', user.id);
+    // Get the current user's profile ID
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (!profileData) {
+      throw new Error('User profile not found');
+    }
 
     const { data, error } = await supabase
       .from('tasks')
-      .insert(taskData)
+      .insert({
+        ...taskData,
+        created_by_profile_id: profileData.id
+      })
       .select(`
         *,
         assignee:profiles!tasks_assignee_id_fkey(id, name, email),
@@ -156,7 +167,6 @@ export const useSupabaseData = () => {
       throw error;
     }
 
-    console.log('Task created successfully:', data);
     setTasks(prev => [data, ...prev]);
     return data;
   };
