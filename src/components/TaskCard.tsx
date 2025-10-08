@@ -65,8 +65,9 @@ export function TaskCard({ task, onEdit, onView, onStatusChange, onDelete }: Tas
       className={`group hover:shadow-md transition-all duration-200 cursor-pointer border-l-4 border-l-primary/20 ${
         isDragging ? 'opacity-50 rotate-2 shadow-lg' : ''
       }`}
+      onClick={() => onView && onView(task)}
     >
-      <CardContent className="p-4">        
+      <CardContent className="p-4">
         {task.project && (
           <div className="mb-2">
             <Badge variant="outline" className="text-xs bg-muted/50">

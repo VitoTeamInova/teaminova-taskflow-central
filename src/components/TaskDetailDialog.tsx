@@ -186,8 +186,8 @@ useEffect(() => {
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0">
-          <DialogHeader className="sticky top-0 z-10 bg-background border-b px-6 pt-6 pb-4">
+        <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0 overflow-hidden">
+          <DialogHeader className="flex-shrink-0 bg-background border-b px-6 pt-6 pb-4">
             <DialogTitle className="flex items-center justify-between">
               <div className="bg-gray-200 p-4 rounded-lg w-full mr-4">
                 <div className="flex items-center gap-3">
@@ -245,8 +245,8 @@ useEffect(() => {
             </DialogTitle>
           </DialogHeader>
           
-          <ScrollArea className="flex-1 px-6">
-            <div className="space-y-6 pb-6">
+          <div className="flex-1 overflow-y-auto px-6">
+            <div className="space-y-6 py-6">
               {/* Basic Info */}
               <div className="bg-blue-50/50 p-4 rounded-lg">
                 <h4 className="font-bold underline mb-3 text-sm">Basic Information</h4>
@@ -683,7 +683,7 @@ useEffect(() => {
                 )}
               </div>
             </div>
-          </ScrollArea>
+          </div>
         </DialogContent>
       </Dialog>
 
