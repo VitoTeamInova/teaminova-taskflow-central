@@ -32,59 +32,57 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        // Auto-create profile if user signs in and doesn't have one
-        if (event === 'SIGNED_IN' && session?.user) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('id')
-            .eq('user_id', session.user.id)
-            .maybeSingle();
-          
-          if (!profile) {
-            await supabase.from('profiles').insert({
-              user_id: session.user.id,
-              name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
-              email: session.user.email || '',
-              role: 'member'
-            });
-          }
-        }
-        
-        setLoading(false);
-      }
-    );
-
-    // Get initial session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      // Auto-create profile if missing
-      if (session?.user) {
-        const { data: profile } = await supabase
+  // Defer profile creation to avoid auth deadlocks
+  const ensureProfileExists = (user: User) => {
+    setTimeout(async () => {
+      try {
+        const { data: profile, error } = await supabase
           .from('profiles')
           .select('id')
-          .eq('user_id', session.user.id)
+          .eq('user_id', user.id)
           .maybeSingle();
-        
+        if (error) {
+          console.error('Profile check error', error);
+          return;
+        }
         if (!profile) {
-          await supabase.from('profiles').insert({
-            user_id: session.user.id,
-            name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
-            email: session.user.email || '',
+          const { error: insertError } = await supabase.from('profiles').insert({
+            user_id: user.id,
+            name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+            email: user.email || '',
             role: 'member'
           });
+          if (insertError) {
+            console.error('Profile insert error', insertError);
+          }
         }
+      } catch (e) {
+        console.error('ensureProfileExists failed', e);
       }
-      
+    }, 0);
+  };
+
+  useEffect(() => {
+    // Set up auth state listener (sync updates only)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
       setLoading(false);
+
+      if (event === 'SIGNED_IN' && session?.user) {
+        ensureProfileExists(session.user);
+      }
+    });
+
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+
+      if (session?.user) {
+        ensureProfileExists(session.user);
+      }
     });
 
     return () => subscription.unsubscribe();
