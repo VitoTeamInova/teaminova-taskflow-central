@@ -1,8 +1,10 @@
-import { Task, TaskStatus } from "@/types/task";
+import { useMemo, useState } from "react";
+import { Task, TaskStatus, Project } from "@/types/task";
 import { TaskCard } from "./TaskCard";
 import { Badge } from "@/components/ui/badge";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   DndContext,
   DragEndEvent,
@@ -19,10 +21,10 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { useState } from "react";
 
 interface TaskBoardProps {
   tasks: Task[];
+  projects?: Project[];
   onEditTask: (task: Task) => void;
   onViewTask?: (task: Task) => void;
   onStatusChange: (taskId: string, status: TaskStatus) => void;
@@ -42,7 +44,7 @@ function DroppableColumn({ status, children }: { status: TaskStatus; children: R
   return <div ref={setNodeRef}>{children}</div>;
 }
 
-export function TaskBoard({ tasks, onEditTask, onViewTask, onStatusChange, onCreateTask, onDeleteTask }: TaskBoardProps) {
+export function TaskBoard({ tasks, projects = [], onEditTask, onViewTask, onStatusChange, onCreateTask, onDeleteTask }: TaskBoardProps) {
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   
   const sensors = useSensors(
@@ -59,8 +61,37 @@ export function TaskBoard({ tasks, onEditTask, onViewTask, onStatusChange, onCre
     })
   );
 
+  const [filterProject, setFilterProject] = useState<string>("all");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
+
+  const isOverdue = (task: Task) => {
+    if (!task.dueDate || task.status === 'completed' || task.status === 'cancelled') return false;
+    return new Date(task.dueDate) < new Date();
+  };
+
+  const filteredTasks = useMemo(() => {
+    return tasks.filter(task => {
+      const matchesProject = filterProject === "all" || task.projectId === filterProject;
+      
+      let matchesStatus = true;
+      if (filterStatus === "overdue") {
+        matchesStatus = isOverdue(task);
+      } else if (filterStatus === "blocked") {
+        matchesStatus = task.status === "blocked";
+      } else if (filterStatus === "todo") {
+        matchesStatus = task.status === "todo";
+      } else if (filterStatus === "in-progress") {
+        matchesStatus = task.status === "in-progress";
+      } else if (filterStatus !== "all") {
+        matchesStatus = task.status === filterStatus;
+      }
+      
+      return matchesProject && matchesStatus;
+    });
+  }, [tasks, filterProject, filterStatus]);
+
   const getTasksByStatus = (status: TaskStatus) => {
-    return tasks.filter(task => task.status === status);
+    return filteredTasks.filter(task => task.status === status);
   };
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -103,6 +134,35 @@ export function TaskBoard({ tasks, onEditTask, onViewTask, onStatusChange, onCre
             <Plus className="h-4 w-4 mr-2" />
             Add Task
           </Button>
+        </div>
+
+        {/* Filters */}
+        <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Select value={filterProject} onValueChange={setFilterProject}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filter by Project" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Projects</SelectItem>
+              {projects.map(project => (
+                <SelectItem key={project.id} value={project.id}>
+                  {project.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={filterStatus} onValueChange={setFilterStatus}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filter by Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="overdue">Tasks Overdue</SelectItem>
+              <SelectItem value="blocked">Tasks Blocked</SelectItem>
+              <SelectItem value="todo">Tasks To Do</SelectItem>
+              <SelectItem value="in-progress">Tasks In Progress</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 h-[calc(100vh-200px)]">

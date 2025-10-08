@@ -35,17 +35,55 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
+        
+        // Auto-create profile if user signs in and doesn't have one
+        if (event === 'SIGNED_IN' && session?.user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('user_id', session.user.id)
+            .maybeSingle();
+          
+          if (!profile) {
+            await supabase.from('profiles').insert({
+              user_id: session.user.id,
+              name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
+              email: session.user.email || '',
+              role: 'member'
+            });
+          }
+        }
+        
         setLoading(false);
       }
     );
 
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      
+      // Auto-create profile if missing
+      if (session?.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('user_id', session.user.id)
+          .maybeSingle();
+        
+        if (!profile) {
+          await supabase.from('profiles').insert({
+            user_id: session.user.id,
+            name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
+            email: session.user.email || '',
+            role: 'member'
+          });
+        }
+      }
+      
       setLoading(false);
     });
 

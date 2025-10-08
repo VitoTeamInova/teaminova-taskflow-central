@@ -17,6 +17,7 @@ interface SidebarProps {
 const getNavigationItems = (taskCount: number) => [
   { id: 'dashboard', label: 'Dashboard', icon: Home },
   { id: 'tasks', label: 'All Tasks', icon: CheckSquare, count: taskCount },
+  { id: 'task-list', label: 'Task List', icon: BarChart3 },
   { id: 'calendar', label: 'Calendar', icon: Calendar },
   { id: 'team', label: 'Team', icon: Users },
   { id: 'projects', label: 'Projects', icon: FolderOpen },

@@ -95,7 +95,7 @@ const Index = () => {
           onBackToProjects={() => setActiveView('projects')}
           updateProject={updateProject}
           deleteProject={deleteProject}
-          deleteTask={deleteTask}
+          deleteTask={handleDeleteTask}
         />
       </AppLayout>
 

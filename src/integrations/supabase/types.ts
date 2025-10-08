@@ -181,6 +181,7 @@ export type Database = {
           percent_completed: number
           priority: Database["public"]["Enums"]["task_priority"]
           project_id: string
+          reference_url: string | null
           start_date: string | null
           status: Database["public"]["Enums"]["task_status"]
           title: string
@@ -198,6 +199,7 @@ export type Database = {
           percent_completed?: number
           priority?: Database["public"]["Enums"]["task_priority"]
           project_id: string
+          reference_url?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["task_status"]
           title: string
@@ -215,6 +217,7 @@ export type Database = {
           percent_completed?: number
           priority?: Database["public"]["Enums"]["task_priority"]
           project_id?: string
+          reference_url?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["task_status"]
           title?: string

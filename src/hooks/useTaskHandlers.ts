@@ -142,7 +142,7 @@ export function useTaskHandlers(
     }
   };
 
-  const handleDeleteTask = async (taskId: string) => {
+  const handleDeleteTask = async (taskId: string): Promise<boolean> => {
     try {
       await deleteTask(taskId);
       
@@ -150,12 +150,14 @@ export function useTaskHandlers(
         title: "Task deleted",
         description: "Task has been successfully deleted.",
       });
+      return true;
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Error deleting task",
         description: "Failed to delete task. Please try again.",
       });
+      return false;
     }
   };
 

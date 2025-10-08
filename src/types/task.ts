@@ -33,6 +33,7 @@ export interface Task {
     createdAt: string;
   }>;
   relatedTasks: string[];
+  reference_url?: string;
   createdAt: string;
   updatedAt: string;
 }

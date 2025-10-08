@@ -541,6 +541,41 @@ useEffect(() => {
                 )}
               </div>
 
+              {/* Reference URL */}
+              <div className="bg-blue-50/50 p-4 rounded-lg">
+                <h4 className="font-bold underline mb-3 text-sm">Reference URL</h4>
+                {isEditMode ? (
+                  <div>
+                    <Label className="text-sm font-semibold">Reference URL (Optional)</Label>
+                    <Input
+                      type="url"
+                      placeholder="https://example.com/task-reference"
+                      value={formData.reference_url || ''}
+                      onChange={(e) => setFormData({ ...formData, reference_url: e.target.value })}
+                      className="mt-1"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Add a URL to external documentation or resources
+                    </p>
+                  </div>
+                ) : (
+                  <div>
+                    {task.reference_url ? (
+                      <a 
+                        href={task.reference_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline text-sm break-all"
+                      >
+                        {task.reference_url}
+                      </a>
+                    ) : (
+                      <span className="text-sm text-muted-foreground">No reference URL set</span>
+                    )}
+                  </div>
+                )}
+              </div>
+
               <Separator />
 
               {/* Update Log */}

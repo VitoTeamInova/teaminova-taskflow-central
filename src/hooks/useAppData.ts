@@ -48,6 +48,7 @@ export function useAppData() {
       createdAt: log.created_at
     })) || [],
     relatedTasks: (task.related_tasks || []).map((rt: any) => rt.related_task_id),
+    reference_url: (task as any).reference_url || undefined,
     createdAt: task.created_at,
     updatedAt: task.updated_at,
   }));

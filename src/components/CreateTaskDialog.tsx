@@ -38,6 +38,7 @@ export function CreateTaskDialog({
     percentCompleted: 0,
     estimatedHours: 0,
     actualHours: 0,
+    reference_url: '',
     updateLog: [],
     relatedTasks: []
   });
@@ -80,6 +81,7 @@ export function CreateTaskDialog({
       percentCompleted: 0,
       estimatedHours: 0,
       actualHours: 0,
+      reference_url: '',
       updateLog: [],
       relatedTasks: []
     });
@@ -292,6 +294,24 @@ export function CreateTaskDialog({
                     className="mt-1"
                   />
                 </div>
+              </div>
+            </div>
+
+            <div className="bg-blue-100/80 p-4 rounded-lg">
+              <h4 className="font-medium mb-3 text-sm">Reference URL</h4>
+              <div>
+                <Label htmlFor="referenceUrl">Reference URL (Optional)</Label>
+                <Input
+                  id="referenceUrl"
+                  type="url"
+                  placeholder="https://example.com/task-reference"
+                  value={formData.reference_url}
+                  onChange={(e) => setFormData({ ...formData, reference_url: e.target.value })}
+                  className="mt-1"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Add a URL to external documentation or resources for this task
+                </p>
               </div>
             </div>
           </div>

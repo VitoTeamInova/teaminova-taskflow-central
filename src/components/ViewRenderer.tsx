@@ -4,6 +4,7 @@ import Calendar from "@/pages/Calendar";
 import Team from "@/pages/Team";
 import Projects from "@/pages/Projects";
 import ProjectDetail from "@/pages/ProjectDetail";
+import TaskList from "@/pages/TaskList";
 import { Task, TaskStatus } from "@/types/task";
 
 interface ViewRendererProps {
@@ -42,11 +43,21 @@ export function ViewRenderer({
       return (
         <TaskBoard
           tasks={tasks}
+          projects={projects}
           onEditTask={onEditTask}
           onViewTask={onViewTask}
           onStatusChange={onStatusChange}
           onCreateTask={onCreateTask}
           onDeleteTask={deleteTask}
+        />
+      );
+    case 'task-list':
+      return (
+        <TaskList
+          tasks={tasks}
+          projects={projects}
+          onEditTask={onEditTask}
+          onCreateTask={onCreateTask}
         />
       );
     case 'dashboard':
