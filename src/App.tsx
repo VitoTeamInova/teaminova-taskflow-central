@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -9,6 +9,24 @@ import { Loader2 } from 'lucide-react';
 
 function App() {
   const { user, loading } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Detect Supabase recovery tokens in URL and ensure we stay on /auth
+  const searchParams = new URLSearchParams(location.search);
+  const hash = location.hash?.startsWith('#') ? location.hash.slice(1) : '';
+  const hashParams = new URLSearchParams(hash);
+  const isRecovery =
+    searchParams.get('mode') === 'update-password' ||
+    searchParams.get('type') === 'recovery' ||
+    hashParams.get('type') === 'recovery' ||
+    ((searchParams.get('access_token') && searchParams.get('refresh_token')) ||
+      (hashParams.get('access_token') && hashParams.get('refresh_token')));
+
+  // If recovery tokens are present on a non-auth route, redirect to /auth preserving tokens
+  if (isRecovery && location.pathname !== '/auth') {
+    navigate(`/auth${location.search}${location.hash}`, { replace: true });
+  }
 
   if (loading) {
     return (
@@ -25,7 +43,7 @@ function App() {
       <Routes>
         <Route 
           path="/auth" 
-          element={user ? <Navigate to="/" replace /> : <Auth />} 
+          element={isRecovery ? <Auth /> : (user ? <Navigate to="/" replace /> : <Auth />)} 
         />
         <Route 
           path="/" 

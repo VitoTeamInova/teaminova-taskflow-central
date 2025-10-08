@@ -103,7 +103,7 @@ export function useTaskHandlers(
       toast({
         variant: "destructive",
         title: "Error updating task",
-        description: "Failed to update task. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to update task. Please try again.",
       });
     }
   };

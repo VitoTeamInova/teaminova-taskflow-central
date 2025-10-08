@@ -19,7 +19,8 @@ const Index = () => {
     openCreateTask, 
     openTaskDetail, 
     setCreateTaskOpen, 
-    setTaskDetailOpen 
+    setTaskDetailOpen,
+    taskDetailInitialEdit
   } = useDialogState();
   
   const [selectedProject, setSelectedProject] = useState<any>(null);
@@ -87,7 +88,8 @@ const Index = () => {
           tasks={tasks}
           projects={projects}
           profiles={profiles}
-          onEditTask={openTaskDetail}
+          onEditTask={(task) => openTaskDetail(task, true)}
+          onViewTask={(task) => openTaskDetail(task, false)}
           onStatusChange={handleStatusChange}
           onCreateTask={openCreateTask}
           onBackToProjects={() => setActiveView('projects')}
@@ -115,6 +117,7 @@ const Index = () => {
         onUpdateTask={handleUpdateTask}
         onAddUpdate={handleAddUpdate}
         onUpdateRelatedTasks={handleUpdateRelatedTasks}
+        initialEditMode={taskDetailInitialEdit}
       />
       
       <ProjectTasksDialog

@@ -13,6 +13,7 @@ interface ViewRendererProps {
   projects: any[];
   profiles: any[];
   onEditTask: (task: Task) => void;
+  onViewTask: (task: Task) => void;
   onStatusChange: (taskId: string, status: TaskStatus) => void;
   onCreateTask: () => void;
   onBackToProjects: () => void;
@@ -28,6 +29,7 @@ export function ViewRenderer({
   projects,
   profiles,
   onEditTask,
+  onViewTask,
   onStatusChange,
   onCreateTask,
   onBackToProjects,
@@ -41,7 +43,7 @@ export function ViewRenderer({
         <TaskBoard
           tasks={tasks}
           onEditTask={onEditTask}
-          onViewTask={onEditTask}
+          onViewTask={onViewTask}
           onStatusChange={onStatusChange}
           onCreateTask={onCreateTask}
           onDeleteTask={deleteTask}

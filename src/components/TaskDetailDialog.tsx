@@ -24,6 +24,7 @@ interface TaskDetailDialogProps {
   onUpdateTask: (taskId: string, updates: Partial<Task>) => void;
   onAddUpdate: (taskId: string, updateText: string) => void;
   onUpdateRelatedTasks?: (taskId: string, relatedTaskIds: string[]) => void;
+  initialEditMode?: boolean;
 }
 
 export function TaskDetailDialog({ 
@@ -35,7 +36,8 @@ export function TaskDetailDialog({
   teamMembers, 
   onUpdateTask, 
   onAddUpdate,
-  onUpdateRelatedTasks 
+  onUpdateRelatedTasks,
+  initialEditMode = false,
 }: TaskDetailDialogProps) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [updateLogOpen, setUpdateLogOpen] = useState(false);
@@ -43,12 +45,12 @@ export function TaskDetailDialog({
   const [cancellationOpen, setCancellationOpen] = useState(false);
   const [formData, setFormData] = useState<Task | null>(null);
 
-  useEffect(() => {
-    if (task) {
-      setFormData({ ...task });
-      setIsEditMode(false);
-    }
-  }, [task]);
+useEffect(() => {
+  if (task) {
+    setFormData({ ...task });
+    setIsEditMode(!!initialEditMode);
+  }
+}, [task, initialEditMode]);
 
   if (!task || !formData) return null;
 
