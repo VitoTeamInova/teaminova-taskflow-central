@@ -19,12 +19,18 @@ export function useTaskHandlers(
       const projectId = taskData.projectId || defaultProjectId;
       
       // Convert frontend task data to database format
+      // Resolve assignee id from provided fields (id > name/email > none)
+      const resolvedAssigneeId = (taskData as any).assigneeId
+        || (taskData.assignee
+          ? (profiles.find((p) => p.id === (taskData as any).assignee || p.name === taskData.assignee || p.email === (taskData as any).assignee)?.id ?? null)
+          : null);
+
       const dbTaskData = {
         title: taskData.title,
         description: taskData.description,
         status: taskData.status,
         priority: taskData.priority,
-        assignee_id: taskData.assignee || null,
+        assignee_id: resolvedAssigneeId,
         project_id: projectId,
         due_date: taskData.dueDate,
         estimated_hours: taskData.estimatedHours || 0,
@@ -85,8 +91,10 @@ export function useTaskHandlers(
       if (updates.estimatedHours !== undefined) dbUpdates.estimated_hours = updates.estimatedHours;
       if (updates.actualHours !== undefined) dbUpdates.actual_hours = updates.actualHours;
       if (updates.reference_url !== undefined) dbUpdates.reference_url = updates.reference_url;
-      if (updates.assignee !== undefined) {
-        dbUpdates.assignee_id = updates.assignee ? profiles.find(p => p.name === updates.assignee)?.id : null;
+      if (updates.assigneeId !== undefined) {
+        dbUpdates.assignee_id = updates.assigneeId || null;
+      } else if (updates.assignee !== undefined) {
+        dbUpdates.assignee_id = updates.assignee ? profiles.find(p => p.name === updates.assignee || p.email === updates.assignee)?.id : null;
       }
 
       await updateTask(taskId, dbUpdates);

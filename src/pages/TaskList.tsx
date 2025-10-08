@@ -1,14 +1,15 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Download, Link as LinkIcon, Check } from "lucide-react";
+import { Plus, Download, Upload, Link as LinkIcon, Check } from "lucide-react";
 import { Task, TaskStatus, Project } from "@/types/task";
 import { useToast } from "@/hooks/use-toast";
 import * as XLSX from 'xlsx';
+import { useAppData } from "@/hooks/useAppData";
 
 interface TaskListProps {
   tasks: Task[];
@@ -22,6 +23,116 @@ export default function TaskList({ tasks, projects, onEditTask, onCreateTask }: 
   const [searchQuery, setSearchQuery] = useState("");
   const [filterProject, setFilterProject] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
+
+  const { createTask, profiles } = useAppData();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const normalizeStatus = (s: string): TaskStatus | null => {
+    const v = (s || "").toLowerCase().trim();
+    if (["todo", "to do"].includes(v)) return "todo";
+    if (["in-progress", "in progress"].includes(v)) return "in-progress";
+    if (["completed", "done"].includes(v)) return "completed";
+    if (["blocked"].includes(v)) return "blocked";
+    if (["cancelled", "canceled"].includes(v)) return "cancelled";
+    return null;
+  };
+
+  const normalizePriority = (p: string): string | null => {
+    const v = (p || "").toLowerCase().trim();
+    if (["low", "medium", "high", "critical"].includes(v)) return v;
+    return null;
+  };
+
+  const toDateISO = (val: any): string | undefined => {
+    if (!val) return undefined;
+    try {
+      if (val instanceof Date) return val.toISOString().slice(0, 10);
+      const parsed = Date.parse(val);
+      if (!isNaN(parsed)) return new Date(parsed).toISOString().slice(0, 10);
+      return undefined;
+    } catch {
+      return undefined;
+    }
+  };
+
+  const handleImportClick = () => fileInputRef.current?.click();
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const rows: any[] = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+
+      let success = 0, skipped = 0;
+      for (const row of rows) {
+        const title = row['Task Title'] || row['Title'] || row['task_title'] || row['task'];
+        const description = row['Description'] || row['description'] || '';
+        const projectName = row['Project'] || row['project'] || '';
+        const statusRaw = row['Status'] || row['status'] || '';
+        const priorityRaw = row['Priority'] || row['priority'] || '';
+        const assigneeRaw = row['Assignee'] || row['assignee'] || '';
+        const dueDateRaw = row['Due Date'] || row['due_date'] || '';
+        const startDateRaw = row['Start Date'] || row['start_date'] || '';
+        const progressRaw = row['Progress'] || row['percentCompleted'] || row['percent_completed'] || '';
+        const estHours = row['Estimated Hours'] ?? row['estimated_hours'] ?? 0;
+        const actHours = row['Actual Hours'] ?? row['actual_hours'] ?? 0;
+        const referenceUrl = row['Reference URL'] || row['reference_url'] || '';
+
+        if (!title || !projectName) { skipped++; continue; }
+
+        const project = projects.find(p => p.name.toLowerCase().trim() === String(projectName).toLowerCase().trim());
+        if (!project) { skipped++; continue; }
+
+        const status = normalizeStatus(String(statusRaw)) ?? 'todo';
+        const priority = normalizePriority(String(priorityRaw)) ?? 'medium';
+
+        const assigneeProfile = profiles.find(p =>
+          p.email?.toLowerCase() === String(assigneeRaw).toLowerCase() ||
+          p.name?.toLowerCase() === String(assigneeRaw).toLowerCase()
+        );
+
+        const percent_completed = typeof progressRaw === 'string' ? Number(String(progressRaw).replace('%','')) : Number(progressRaw || 0);
+
+        try {
+          await createTask({
+            title,
+            description,
+            status,
+            priority,
+            assignee_id: assigneeProfile?.id ?? null,
+            project_id: project.id,
+            due_date: toDateISO(dueDateRaw),
+            start_date: toDateISO(startDateRaw),
+            percent_completed: isNaN(percent_completed) ? 0 : percent_completed,
+            estimated_hours: Number(estHours) || 0,
+            actual_hours: Number(actHours) || 0,
+            reference_url: referenceUrl || null,
+          });
+          success++;
+        } catch {
+          skipped++;
+        }
+      }
+
+      toast({
+        title: "Import finished",
+        description: `Imported ${success} task(s). Skipped ${skipped}.`,
+      });
+    } catch (err) {
+      toast({
+        variant: 'destructive',
+        title: 'Import failed',
+        description: 'Could not parse the file. Ensure it is a valid Excel/CSV with correct columns.',
+      });
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
   
   const isOverdue = (task: Task) => {
     if (!task.dueDate || task.status === 'completed' || task.status === 'cancelled') return false;
@@ -119,11 +230,22 @@ export default function TaskList({ tasks, projects, onEditTask, onCreateTask }: 
             <Download className="h-4 w-4 mr-2" />
             Export to Excel
           </Button>
+          <Button onClick={handleImportClick} variant="outline">
+            <Upload className="h-4 w-4 mr-2" />
+            Import Tasks
+          </Button>
           <Button onClick={onCreateTask} className="bg-primary hover:bg-primary-hover">
             <Plus className="h-4 w-4 mr-2" />
             Add Task
           </Button>
         </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".xlsx,.xls,.csv"
+          onChange={handleFileChange}
+          className="hidden"
+        />
       </div>
 
       {/* Filters */}

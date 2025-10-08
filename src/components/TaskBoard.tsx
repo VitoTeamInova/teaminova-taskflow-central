@@ -102,18 +102,29 @@ export function TaskBoard({ tasks, projects = [], onEditTask, onViewTask, onStat
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    
     if (!over) return;
-    
+
     const taskId = active.id as string;
-    const newStatus = over.id as TaskStatus;
-    
-    // Check if the task is being moved to a different column
-    const task = tasks.find(t => t.id === taskId);
-    if (task && task.status !== newStatus) {
-      onStatusChange(taskId, newStatus);
+    const overId = over.id as string;
+
+    // Determine the target column status:
+    // - If dropping on a column, overId is the column status
+    // - If dropping on a card, overId is the task id; infer its column by that task's status
+    let targetStatus: TaskStatus | null = null;
+    if (columns.some((c) => c.status === (overId as TaskStatus))) {
+      targetStatus = overId as TaskStatus;
+    } else {
+      const overTask = tasks.find((t) => t.id === overId);
+      if (overTask) targetStatus = overTask.status;
     }
-    
+
+    if (!targetStatus) return;
+
+    const task = tasks.find((t) => t.id === taskId);
+    if (task && task.status !== targetStatus) {
+      onStatusChange(taskId, targetStatus);
+    }
+
     setActiveTask(null);
   };
 
