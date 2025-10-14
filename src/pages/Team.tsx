@@ -26,7 +26,7 @@ const roleLabels = {
 
 const Team = () => {
   const { profiles, tasks, loading, refetchProfiles } = useSupabaseData();
-  const { getUserPrimaryRole } = useRoleManagement();
+  const { getUserPrimaryRole, updateUserRole } = useRoleManagement();
   const [selectedMember, setSelectedMember] = useState<any>(null);
   const [editingMember, setEditingMember] = useState<any>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -75,16 +75,7 @@ const Team = () => {
       // The profile will be created automatically by the trigger
       // Now add the role to user_roles table
       if (data.user && newMember.role) {
-        const { error: roleError } = await supabase
-          .from('user_roles')
-          .insert([{
-            user_id: data.user.id,
-            role: newMember.role as any
-          }]);
-
-        if (roleError) {
-          console.error('Error adding role:', roleError);
-        }
+        await updateUserRole(data.user.id, newMember.role as any);
       }
 
       await refetchProfiles();
@@ -130,23 +121,7 @@ const Team = () => {
 
       // Update role in user_roles table if changed
       if (editingMember.role) {
-        // First delete existing roles
-        await supabase
-          .from('user_roles')
-          .delete()
-          .eq('user_id', editingMember.user_id);
-
-        // Then insert the new role
-        const { error: roleError } = await supabase
-          .from('user_roles')
-          .insert([{
-            user_id: editingMember.user_id,
-            role: editingMember.role as any
-          }]);
-
-        if (roleError) {
-          console.error('Error updating role:', roleError);
-        }
+        await updateUserRole(editingMember.user_id, editingMember.role as any);
       }
 
       await refetchProfiles();

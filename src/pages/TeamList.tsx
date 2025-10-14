@@ -33,7 +33,7 @@ const roleLabels = {
 
 export default function TeamList() {
   const { profiles, tasks, loading, refetchProfiles } = useSupabaseData();
-  const { getUserPrimaryRole } = useRoleManagement();
+  const { getUserPrimaryRole, updateUserRole } = useRoleManagement();
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [editingMember, setEditingMember] = useState<any>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -76,23 +76,7 @@ export default function TeamList() {
 
       // Update role in user_roles table if changed
       if (editingMember.role) {
-        // First delete existing roles
-        await supabase
-          .from('user_roles')
-          .delete()
-          .eq('user_id', editingMember.user_id);
-
-        // Then insert the new role
-        const { error: roleError } = await supabase
-          .from('user_roles')
-          .insert([{
-            user_id: editingMember.user_id,
-            role: editingMember.role as any
-          }]);
-
-        if (roleError) {
-          console.error('Error updating role:', roleError);
-        }
+        await updateUserRole(editingMember.user_id, editingMember.role as any);
       }
 
       await refetchProfiles();
