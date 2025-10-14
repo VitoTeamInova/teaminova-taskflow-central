@@ -364,7 +364,8 @@ const Team = () => {
                     variant="outline" 
                     size="sm"
                     onClick={() => {
-                      setEditingMember({ ...member });
+                      const currentRole = getUserPrimaryRole(member.user_id);
+                      setEditingMember({ ...member, role: currentRole });
                       setIsEditDialogOpen(true);
                     }}
                   >
@@ -410,7 +411,7 @@ const Team = () => {
                     <SecureEmail email={selectedMember.email} userId={selectedMember.user_id} showIcon={false} />
                   </div>
                   <div>
-                    <span className="font-medium">Role:</span> {selectedMember.role}
+                    <span className="font-medium">Role:</span> {roleLabels[getUserPrimaryRole(selectedMember.user_id)]}
                   </div>
                 </div>
               </div>

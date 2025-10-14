@@ -1,4 +1,4 @@
-import { Home, CheckSquare, Calendar, Users, BarChart3, Settings, FolderOpen, Plus, ChevronDown, ChevronRight, List } from "lucide-react";
+import { Home, CheckSquare, Calendar, Users, FolderOpen, ChevronDown, ChevronRight, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Project, Task } from "@/types/task";
@@ -13,16 +13,17 @@ interface SidebarProps {
   activeView: string;
   onViewChange: (view: string) => void;
   onCreateProject?: () => void;
-  onSettingsClick?: () => void;
 }
 
 const getNavigationItems = (taskCount: number, activeTaskCount: number) => [
   { id: 'dashboard', label: 'Dashboard', icon: Home },
+  { id: 'tasks', label: 'Tasks', icon: CheckSquare },
+  { id: 'team', label: 'Team', icon: Users },
   { id: 'calendar', label: 'Calendar', icon: Calendar },
   { id: 'projects', label: 'Projects', icon: FolderOpen },
 ];
 
-export function Sidebar({ projects, tasks, profiles, activeView, onViewChange, onCreateProject, onSettingsClick }: SidebarProps) {
+export function Sidebar({ projects, tasks, profiles, activeView, onViewChange, onCreateProject }: SidebarProps) {
   const { user } = useAuth();
   const [tasksOpen, setTasksOpen] = useState(true);
   const [teamOpen, setTeamOpen] = useState(true);
@@ -51,7 +52,26 @@ export function Sidebar({ projects, tasks, profiles, activeView, onViewChange, o
             <span className="flex-1 text-left">Dashboard</span>
           </Button>
 
-          {/* Tasks Section */}
+          {/* Quick links moved up as requested */}
+          <Button
+            variant={activeView === 'tasks' ? "secondary" : "ghost"}
+            className="w-full justify-start h-10"
+            onClick={() => onViewChange('tasks')}
+          >
+            <CheckSquare className="h-4 w-4 mr-3" />
+            <span className="flex-1 text-left">Tasks</span>
+          </Button>
+
+          <Button
+            variant={activeView === 'team' ? "secondary" : "ghost"}
+            className="w-full justify-start h-10"
+            onClick={() => onViewChange('team')}
+          >
+            <Users className="h-4 w-4 mr-3" />
+            <span className="flex-1 text-left">Team</span>
+          </Button>
+
+          {/* Collapsible sections kept but moved below quick links */}
           <Collapsible open={tasksOpen} onOpenChange={setTasksOpen}>
             <CollapsibleTrigger asChild>
               <Button variant="ghost" className="w-full justify-start h-10">
@@ -82,7 +102,6 @@ export function Sidebar({ projects, tasks, profiles, activeView, onViewChange, o
             </CollapsibleContent>
           </Collapsible>
 
-          {/* Team Section */}
           <Collapsible open={teamOpen} onOpenChange={setTeamOpen}>
             <CollapsibleTrigger asChild>
               <Button variant="ghost" className="w-full justify-start h-10">
@@ -150,12 +169,6 @@ export function Sidebar({ projects, tasks, profiles, activeView, onViewChange, o
           </div>
         </div>
 
-        <div className="absolute bottom-4 left-4 right-4">
-          <Button variant="ghost" className="w-full justify-start" onClick={onSettingsClick}>
-            <Settings className="h-4 w-4 mr-3" />
-            Settings
-          </Button>
-        </div>
       </div>
     </aside>
   );

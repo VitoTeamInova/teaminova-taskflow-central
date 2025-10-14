@@ -28,7 +28,7 @@ export function AppLayout({
   const [settingsOpen, setSettingsOpen] = useState(false);
   return (
     <div className="min-h-screen bg-background">
-      <Header onCreateTask={onCreateTask} onViewChange={onViewChange} />
+      <Header onViewChange={onViewChange} onSettingsClick={() => setSettingsOpen(true)} />
       
       <div className="flex h-[calc(100vh-64px)]">
         <Sidebar 
@@ -38,7 +38,6 @@ export function AppLayout({
           activeView={activeView}
           onViewChange={onViewChange}
           onCreateProject={onCreateProject}
-          onSettingsClick={() => setSettingsOpen(true)}
         />
         
         <SettingsDialog 

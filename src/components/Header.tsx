@@ -1,4 +1,4 @@
-import { Plus, Bell, User, LogOut } from "lucide-react";
+import { Bell, User, LogOut, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
@@ -14,11 +14,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 interface HeaderProps {
-  onCreateTask: () => void;
   onViewChange: (view: string) => void;
+  onSettingsClick: () => void;
 }
 
-export function Header({ onCreateTask, onViewChange }: HeaderProps) {
+export function Header({ onViewChange, onSettingsClick }: HeaderProps) {
   const { user, signOut } = useAuth();
   const { tasks } = useSupabaseData();
 
@@ -53,10 +53,6 @@ export function Header({ onCreateTask, onViewChange }: HeaderProps) {
         </div>
 
         <div className="flex items-center space-x-4">
-          <Button onClick={onCreateTask} className="bg-primary hover:bg-primary-hover">
-            <Plus className="h-4 w-4 mr-2" />
-            New Task
-          </Button>
           
           <Button 
             variant="ghost" 
@@ -93,6 +89,9 @@ export function Header({ onCreateTask, onViewChange }: HeaderProps) {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          <Button variant="ghost" size="icon" onClick={onSettingsClick} title="Settings">
+            <Settings className="h-5 w-5" />
+          </Button>
         </div>
       </div>
     </header>
