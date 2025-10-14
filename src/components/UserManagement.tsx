@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 import { useUserManagement } from '@/hooks/useUserManagement';
 import { UserCard } from '@/components/UserCard';
+import { supabase } from '@/integrations/supabase/client';
+import { AppRole } from '@/types/user';
 
 export function UserManagement() {
   const { user } = useAuth();
@@ -13,12 +15,27 @@ export function UserManagement() {
     actionLoading,
     sendPasswordReset,
     deleteUser,
-    updateUserAccessLevel
+    updateUserRole
   } = useUserManagement();
 
-  // Check if current user has admin access
-  const currentUserProfile = users.find(u => u.user_id === user?.id);
-  const isAdmin = currentUserProfile?.email === 'vito@teaminova.com' || currentUserProfile?.access_level === 'admin';
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      if (!user) return;
+      
+      const { data } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', 'administrator')
+        .single();
+      
+      setIsAdmin(!!data);
+    };
+    
+    checkAdmin();
+  }, [user]);
 
   if (!isAdmin) {
     return (
@@ -59,7 +76,7 @@ export function UserManagement() {
             actionLoading={actionLoading}
             onPasswordReset={sendPasswordReset}
             onDelete={deleteUser}
-            onAccessLevelChange={updateUserAccessLevel}
+            onRoleChange={(userId, role) => updateUserRole(userId, role)}
           />
         ))}
         

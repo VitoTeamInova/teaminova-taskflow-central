@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Trash2, Mail, Shield, ShieldCheck, Eye, EyeOff } from 'lucide-react';
+import { Loader2, Trash2, Mail, Shield, Users, Briefcase, Code, User, EyeOff } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,8 +14,9 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Profile } from '@/types/user';
+import { Profile, AppRole } from '@/types/user';
 import { useEmailVisibility, maskEmail } from '@/hooks/useEmailVisibility';
+import { supabase } from '@/integrations/supabase/client';
 
 interface UserCardProps {
   profile: Profile;
@@ -23,8 +24,26 @@ interface UserCardProps {
   actionLoading: string | null;
   onPasswordReset: (email: string, userId: string) => void;
   onDelete: (userId: string, userEmail: string) => void;
-  onAccessLevelChange: (userId: string, newAccessLevel: string) => void;
+  onRoleChange: (userId: string, newRole: AppRole) => void;
 }
+
+const roleIcons = {
+  administrator: Shield,
+  project_manager: Briefcase,
+  dev_lead: Code,
+  developer: Code,
+  product_owner: Users,
+  team_member: User,
+};
+
+const roleLabels = {
+  administrator: 'Administrator',
+  project_manager: 'Project Manager',
+  dev_lead: 'Dev Lead/Architect',
+  developer: 'Developer',
+  product_owner: 'Product Owner',
+  team_member: 'Team Member',
+};
 
 export function UserCard({
   profile,
@@ -32,18 +51,38 @@ export function UserCard({
   actionLoading,
   onPasswordReset,
   onDelete,
-  onAccessLevelChange
+  onRoleChange
 }: UserCardProps) {
   const { canViewEmail } = useEmailVisibility(profile.user_id);
   const displayEmail = canViewEmail ? profile.email : maskEmail(profile.email);
+  const [userRole, setUserRole] = useState<AppRole>('team_member');
+
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      const { data } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', profile.user_id)
+        .single();
+      
+      if (data) {
+        setUserRole(data.role as AppRole);
+      }
+    };
+    
+    fetchUserRole();
+  }, [profile.user_id]);
+
+  const RoleIcon = roleIcons[userRole];
 
   return (
     <div className="flex items-center justify-between p-4 border rounded-lg">
       <div className="flex-1">
         <div className="flex items-center gap-2">
           <h4 className="font-medium">{profile.name}</h4>
-          <Badge variant={profile.access_level === 'admin' ? 'default' : 'secondary'}>
-            {profile.access_level}
+          <Badge variant={userRole === 'administrator' ? 'default' : 'secondary'}>
+            <RoleIcon className="h-3 w-3 mr-1" />
+            {roleLabels[userRole]}
           </Badge>
         </div>
         <div className="flex items-center gap-2">
@@ -61,26 +100,25 @@ export function UserCard({
       <div className="flex items-center gap-2">
         <div className="flex items-center gap-1">
           <Select
-            value={profile.access_level || 'user'}
-            onValueChange={(value) => onAccessLevelChange(profile.user_id, value)}
+            value={userRole}
+            onValueChange={(value) => onRoleChange(profile.user_id, value as AppRole)}
             disabled={actionLoading === profile.user_id || profile.user_id === currentUserId}
           >
-            <SelectTrigger className="w-24 h-8">
+            <SelectTrigger className="w-48 h-8">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="user">
-                <div className="flex items-center gap-1">
-                  <Shield className="h-3 w-3" />
-                  User
-                </div>
-              </SelectItem>
-              <SelectItem value="admin">
-                <div className="flex items-center gap-1">
-                  <ShieldCheck className="h-3 w-3" />
-                  Admin
-                </div>
-              </SelectItem>
+              {Object.entries(roleLabels).map(([value, label]) => {
+                const Icon = roleIcons[value as AppRole];
+                return (
+                  <SelectItem key={value} value={value}>
+                    <div className="flex items-center gap-2">
+                      <Icon className="h-3 w-3" />
+                      {label}
+                    </div>
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
         </div>

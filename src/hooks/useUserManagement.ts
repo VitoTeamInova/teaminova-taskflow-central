@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Profile } from '@/types/user';
+import { Profile, AppRole } from '@/types/user';
 
 export function useUserManagement() {
   const [users, setUsers] = useState<Profile[]>([]);
@@ -81,19 +81,27 @@ export function useUserManagement() {
     }
   };
 
-  const updateUserAccessLevel = async (userId: string, newAccessLevel: string) => {
+  const updateUserRole = async (userId: string, newRole: AppRole) => {
     setActionLoading(userId);
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ access_level: newAccessLevel })
+      // Remove all existing roles for this user
+      const { error: deleteError } = await supabase
+        .from('user_roles')
+        .delete()
         .eq('user_id', userId);
 
-      if (error) throw error;
+      if (deleteError) throw deleteError;
+
+      // Add the new role
+      const { error: insertError } = await supabase
+        .from('user_roles')
+        .insert([{ user_id: userId, role: newRole }]);
+
+      if (insertError) throw insertError;
 
       toast({
-        title: "Access level updated",
-        description: `User access level changed to ${newAccessLevel}`,
+        title: "Role updated",
+        description: `User role changed to ${newRole.replace('_', ' ')}`,
       });
 
       // Refresh the users list
@@ -101,7 +109,7 @@ export function useUserManagement() {
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Error updating access level",
+        title: "Error updating role",
         description: error.message,
       });
     } finally {
@@ -119,7 +127,7 @@ export function useUserManagement() {
     actionLoading,
     sendPasswordReset,
     deleteUser,
-    updateUserAccessLevel,
+    updateUserRole,
     fetchUsers
   };
 }
