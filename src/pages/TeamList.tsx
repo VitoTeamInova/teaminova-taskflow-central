@@ -3,7 +3,7 @@ import { useSupabaseData } from "@/hooks/useSupabaseData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { useRoleManagement } from "@/hooks/useRoleManagement";
 import { AppRole } from "@/types/user";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { errorLogger } from "@/lib/errorLogger";
 
 const roleIcons = {
   administrator: Shield,
@@ -76,7 +77,8 @@ export default function TeamList() {
 
       // Update role in user_roles table if changed
       if (editingMember.role) {
-        await updateUserRole(editingMember.user_id, editingMember.role as any);
+        const ok = await updateUserRole(editingMember.user_id, editingMember.role as any);
+        if (!ok) return; // Stop if role update failed
       }
 
       await refetchProfiles();
@@ -89,6 +91,7 @@ export default function TeamList() {
       });
     } catch (error) {
       console.error('Error updating member:', error);
+      errorLogger.logDatabaseError('Error updating team member', error as any, { scope: 'TeamList.handleEditMember', editingMember });
       toast({
         title: "Error",
         description: "Failed to update team member.",
@@ -201,6 +204,7 @@ export default function TeamList() {
         <DialogContent className="bg-card/95 backdrop-blur">
           <DialogHeader>
             <DialogTitle>Edit Team Member</DialogTitle>
+            <DialogDescription>Update details or change the member's role.</DialogDescription>
           </DialogHeader>
           {editingMember && (
             <div className="space-y-4">

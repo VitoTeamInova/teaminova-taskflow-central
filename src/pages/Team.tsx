@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { SecureEmail } from "@/components/SecureEmail";
 import { useRoleManagement } from "@/hooks/useRoleManagement";
-
+import { errorLogger } from "@/lib/errorLogger";
 const roleLabels = {
   administrator: 'Administrator',
   project_manager: 'Project Manager',
@@ -74,9 +74,10 @@ const Team = () => {
 
       // The profile will be created automatically by the trigger
       // Now add the role to user_roles table
-      if (data.user && newMember.role) {
-        await updateUserRole(data.user.id, newMember.role as any);
-      }
+        if (data.user && newMember.role) {
+          const ok = await updateUserRole(data.user.id, newMember.role as any);
+          if (!ok) return; // Stop if role update failed
+        }
 
       await refetchProfiles();
       setNewMember({ name: '', email: '', role: '', photo: '' });
@@ -88,6 +89,7 @@ const Team = () => {
       });
     } catch (error) {
       console.error('Error adding member:', error);
+      errorLogger.logDatabaseError('Error adding member', error as any, { scope: 'Team.handleAddMember', newMember });
       toast({
         title: "Error",
         description: "Failed to add team member.",
@@ -121,7 +123,8 @@ const Team = () => {
 
       // Update role in user_roles table if changed
       if (editingMember.role) {
-        await updateUserRole(editingMember.user_id, editingMember.role as any);
+        const ok = await updateUserRole(editingMember.user_id, editingMember.role as any);
+        if (!ok) return; // Stop if role update failed
       }
 
       await refetchProfiles();
@@ -134,6 +137,7 @@ const Team = () => {
       });
     } catch (error) {
       console.error('Error updating member:', error);
+      errorLogger.logDatabaseError('Error updating team member', error as any, { scope: 'Team.handleEditMember', editingMember });
       toast({
         title: "Error",
         description: "Failed to update team member.",
@@ -214,6 +218,7 @@ const Team = () => {
           <DialogContent className="bg-card/95 backdrop-blur">
             <DialogHeader>
               <DialogTitle>Add New Team Member</DialogTitle>
+              <DialogDescription>Provide member details and select a role.</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 bg-blue-50/50 p-4 rounded-lg">
               <h4 className="font-medium mb-3 text-sm">Team Member Information</h4>
@@ -473,6 +478,7 @@ const Team = () => {
         <DialogContent className="bg-card/95 backdrop-blur">
           <DialogHeader>
             <DialogTitle>Edit Team Member</DialogTitle>
+            <DialogDescription>Update details or change the member's role.</DialogDescription>
           </DialogHeader>
           {editingMember && (
             <div className="space-y-4 bg-blue-50/50 p-4 rounded-lg">

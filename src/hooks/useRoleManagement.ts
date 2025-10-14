@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { AppRole, UserRole } from '@/types/user';
+import { errorLogger } from '@/lib/errorLogger';
 
 export function useRoleManagement() {
   const [userRoles, setUserRoles] = useState<Record<string, AppRole[]>>({});
@@ -29,46 +30,54 @@ export function useRoleManagement() {
 
       setUserRoles(rolesByUser);
     } catch (error: any) {
+      errorLogger.logDatabaseError("Error fetching roles", error, { scope: "useRoleManagement.fetchUserRoles" });
       toast({
         variant: "destructive",
         title: "Error fetching roles",
-        description: error.message,
+        description: error?.message || "Unknown error",
       });
     } finally {
       setLoading(false);
     }
   };
 
-  const updateUserRole = async (userId: string, newRole: AppRole) => {
+  const updateUserRole = async (userId: string, newRole: AppRole): Promise<boolean> => {
     setActionLoading(userId);
     try {
       // First, remove all existing roles for this user
-      const { error: deleteError } = await supabase
+      const { error: deleteError, status: deleteStatus } = await supabase
         .from('user_roles')
         .delete()
         .eq('user_id', userId);
 
-      if (deleteError) throw deleteError;
+      if (deleteError) {
+        throw Object.assign(deleteError, { status: deleteStatus });
+      }
 
       // Then add the new role
-      const { error: insertError } = await supabase
+      const { error: insertError, status: insertStatus } = await supabase
         .from('user_roles')
         .insert({ user_id: userId, role: newRole });
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        throw Object.assign(insertError, { status: insertStatus });
+      }
 
-      toast({
-        title: "Role updated",
-        description: `User role changed to ${newRole.replace('_', ' ')}`,
-      });
-
+      // Refresh roles for UI
       await fetchUserRoles();
+      return true;
     } catch (error: any) {
+      // Log centrally and surface a helpful message
+      errorLogger.logDatabaseError("Error updating user role", error, { userId, newRole });
+      const isForbidden = (error?.status === 403) || (error?.code === 'PGRST301');
       toast({
         variant: "destructive",
-        title: "Error updating role",
-        description: error.message,
+        title: "Role update failed",
+        description: isForbidden
+          ? "You don't have permission to change roles. Please contact an administrator."
+          : (error?.message || "Unexpected error"),
       });
+      return false;
     } finally {
       setActionLoading(null);
     }
