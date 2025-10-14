@@ -2,6 +2,8 @@ import { Plus, Bell, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSupabaseData } from "@/hooks/useSupabaseData";
+import { useMemo } from "react";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -13,10 +15,27 @@ import {
 
 interface HeaderProps {
   onCreateTask: () => void;
+  onViewChange: (view: string) => void;
 }
 
-export function Header({ onCreateTask }: HeaderProps) {
+export function Header({ onCreateTask, onViewChange }: HeaderProps) {
   const { user, signOut } = useAuth();
+  const { tasks } = useSupabaseData();
+
+  const criticalOverdueTasks = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    return tasks.filter(task => {
+      if (task.status === 'completed' || task.status === 'cancelled') return false;
+      if (!task.due_date) return false;
+      
+      const dueDate = new Date(task.due_date);
+      dueDate.setHours(0, 0, 0, 0);
+      
+      return dueDate < today && (task.priority === 'critical' || task.priority === 'high');
+    });
+  }, [tasks]);
 
   return (
     <header className="border-b bg-card">
@@ -39,11 +58,19 @@ export function Header({ onCreateTask }: HeaderProps) {
             New Task
           </Button>
           
-          <Button variant="ghost" size="icon" className="relative">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="relative"
+            onClick={() => onViewChange('overdue-tasks')}
+            title="Critical overdue tasks"
+          >
             <Bell className="h-5 w-5" />
-            <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs">
-              3
-            </Badge>
+            {criticalOverdueTasks.length > 0 && (
+              <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs">
+                {criticalOverdueTasks.length}
+              </Badge>
+            )}
           </Button>
           
           <DropdownMenu>

@@ -2,9 +2,11 @@ import { TaskBoard } from "@/components/TaskBoard";
 import Dashboard from "@/pages/Dashboard";
 import Calendar from "@/pages/Calendar";
 import Team from "@/pages/Team";
+import TeamList from "@/pages/TeamList";
 import Projects from "@/pages/Projects";
 import ProjectDetail from "@/pages/ProjectDetail";
 import TaskList from "@/pages/TaskList";
+import OverdueTasks from "@/pages/OverdueTasks";
 import { Task, TaskStatus } from "@/types/task";
 
 interface ViewRendererProps {
@@ -66,6 +68,10 @@ export function ViewRenderer({
       return <Calendar />;
     case 'team':
       return <Team />;
+    case 'team-list':
+      return <TeamList />;
+    case 'overdue-tasks':
+      return <OverdueTasks />;
     case 'projects':
       return <Projects />;
     case 'project-detail':

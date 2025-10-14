@@ -176,7 +176,7 @@ const Team = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="h-full bg-background p-6 overflow-y-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold">Team Management</h1>
@@ -217,12 +217,20 @@ const Team = () => {
               </div>
               <div>
                 <Label htmlFor="role">Role</Label>
-                <Input
+                <select
                   id="role"
                   value={newMember.role}
                   onChange={(e) => setNewMember({ ...newMember, role: e.target.value })}
-                  placeholder="Enter role (e.g., Developer, Designer)"
-                />
+                  className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm"
+                >
+                  <option value="">Select a role</option>
+                  <option value="administrator">Administrator</option>
+                  <option value="project_manager">Project Manager</option>
+                  <option value="dev_lead">Dev Lead/Architect</option>
+                  <option value="developer">Developer</option>
+                  <option value="product_owner">Product Owner</option>
+                  <option value="team_member">Team Member</option>
+                </select>
               </div>
               <div>
                 <Label htmlFor="photo">Photo URL</Label>
