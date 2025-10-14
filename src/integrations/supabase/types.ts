@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      error_logs: {
+        Row: {
+          category: string
+          context: Json | null
+          created_at: string
+          id: string
+          message: string
+          resolved: boolean
+          severity: string
+          stack: string | null
+          timestamp: string
+          user_id: string | null
+        }
+        Insert: {
+          category: string
+          context?: Json | null
+          created_at?: string
+          id?: string
+          message: string
+          resolved?: boolean
+          severity: string
+          stack?: string | null
+          timestamp?: string
+          user_id?: string | null
+        }
+        Update: {
+          category?: string
+          context?: Json | null
+          created_at?: string
+          id?: string
+          message?: string
+          resolved?: boolean
+          severity?: string
+          stack?: string | null
+          timestamp?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       milestones: {
         Row: {
           completed: boolean

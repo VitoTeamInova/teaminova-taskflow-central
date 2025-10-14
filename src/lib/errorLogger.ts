@@ -88,20 +88,21 @@ class ErrorLogger {
       if (!errorLog) continue;
 
       try {
-        // In a real implementation, you would save to a database table
-        // For now, we'll just log to console
-        console.error('[Error Log Processed]', errorLog);
-        
-        // You could uncomment this when you have an error_logs table:
-        // await supabase.from('error_logs').insert({
-        //   severity: errorLog.severity,
-        //   category: errorLog.category,
-        //   message: errorLog.message,
-        //   stack: errorLog.stack,
-        //   user_id: errorLog.user_id,
-        //   context: errorLog.context,
-        //   resolved: false,
-        // });
+        // Save to database
+        await supabase.from('error_logs').insert({
+          severity: errorLog.severity,
+          category: errorLog.category,
+          message: errorLog.message,
+          stack: errorLog.stack,
+          user_id: errorLog.user_id,
+          context: errorLog.context,
+          resolved: false,
+        });
+
+        // Also log to console in development
+        if (import.meta.env.DEV) {
+          console.error('[Error Log Saved]', errorLog);
+        }
       } catch (error) {
         console.error('Failed to process error log:', error);
         // Re-queue if failed (with a limit to prevent infinite loops)

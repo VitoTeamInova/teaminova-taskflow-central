@@ -13,9 +13,20 @@ import { useSupabaseData } from "@/hooks/useSupabaseData";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { SecureEmail } from "@/components/SecureEmail";
+import { useRoleManagement } from "@/hooks/useRoleManagement";
+
+const roleLabels = {
+  administrator: 'Administrator',
+  project_manager: 'Project Manager',
+  dev_lead: 'Dev Lead/Architect',
+  developer: 'Developer',
+  product_owner: 'Product Owner',
+  team_member: 'Team Member',
+} as const;
 
 const Team = () => {
   const { profiles, tasks, loading, refetchProfiles } = useSupabaseData();
+  const { getUserPrimaryRole } = useRoleManagement();
   const [selectedMember, setSelectedMember] = useState<any>(null);
   const [editingMember, setEditingMember] = useState<any>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -62,6 +73,20 @@ const Team = () => {
       }
 
       // The profile will be created automatically by the trigger
+      // Now add the role to user_roles table
+      if (data.user && newMember.role) {
+        const { error: roleError } = await supabase
+          .from('user_roles')
+          .insert([{
+            user_id: data.user.id,
+            role: newMember.role as any
+          }]);
+
+        if (roleError) {
+          console.error('Error adding role:', roleError);
+        }
+      }
+
       await refetchProfiles();
       setNewMember({ name: '', email: '', role: '', photo: '' });
       setIsAddDialogOpen(false);
@@ -84,12 +109,12 @@ const Team = () => {
     if (!editingMember) return;
 
     try {
+      // Update profile info
       const { error } = await supabase
         .from('profiles')
         .update({
           name: editingMember.name,
           email: editingMember.email,
-          role: editingMember.role,
           avatar: editingMember.avatar
         })
         .eq('id', editingMember.id);
@@ -101,6 +126,27 @@ const Team = () => {
           variant: "destructive"
         });
         return;
+      }
+
+      // Update role in user_roles table if changed
+      if (editingMember.role) {
+        // First delete existing roles
+        await supabase
+          .from('user_roles')
+          .delete()
+          .eq('user_id', editingMember.user_id);
+
+        // Then insert the new role
+        const { error: roleError } = await supabase
+          .from('user_roles')
+          .insert([{
+            user_id: editingMember.user_id,
+            role: editingMember.role as any
+          }]);
+
+        if (roleError) {
+          console.error('Error updating role:', roleError);
+        }
       }
 
       await refetchProfiles();
@@ -257,6 +303,7 @@ const Team = () => {
         {profiles.map(member => {
           const memberTasks = getMemberTasks(member.id);
           const completedTasks = memberTasks.filter(task => task.status === 'completed').length;
+          const userRole = getUserPrimaryRole(member.user_id);
           
           return (
             <Card key={member.id} className="bg-card/50 backdrop-blur hover:bg-card/70 transition-colors">
@@ -269,7 +316,7 @@ const Team = () => {
                 </div>
                 <CardTitle className="text-lg">{member.name}</CardTitle>
                 <Badge variant="secondary" className="w-fit mx-auto">
-                  {member.role || 'Member'}
+                  {roleLabels[userRole] || 'Team Member'}
                 </Badge>
               </CardHeader>
               

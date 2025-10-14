@@ -3,9 +3,15 @@ import { useSupabaseData } from "@/hooks/useSupabaseData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Mail, Shield, Users, Briefcase, Code, User } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Mail, Shield, Users, Briefcase, Code, User, Pencil } from "lucide-react";
 import { useRoleManagement } from "@/hooks/useRoleManagement";
 import { AppRole } from "@/types/user";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const roleIcons = {
   administrator: Shield,
@@ -26,9 +32,12 @@ const roleLabels = {
 };
 
 export default function TeamList() {
-  const { profiles, tasks, loading } = useSupabaseData();
+  const { profiles, tasks, loading, refetchProfiles } = useSupabaseData();
   const { getUserPrimaryRole } = useRoleManagement();
   const [roleFilter, setRoleFilter] = useState<string>("all");
+  const [editingMember, setEditingMember] = useState<any>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const { toast } = useToast();
 
   const filteredProfiles = useMemo(() => {
     if (roleFilter === "all") return profiles;
@@ -40,6 +49,68 @@ export default function TeamList() {
 
   const getTaskCount = (profileId: string) => {
     return tasks.filter(task => task.assignee_id === profileId).length;
+  };
+
+  const handleEditMember = async () => {
+    if (!editingMember) return;
+
+    try {
+      // Update profile info
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          name: editingMember.name,
+          email: editingMember.email,
+          avatar: editingMember.avatar
+        })
+        .eq('id', editingMember.id);
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to update team member: " + error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Update role in user_roles table if changed
+      if (editingMember.role) {
+        // First delete existing roles
+        await supabase
+          .from('user_roles')
+          .delete()
+          .eq('user_id', editingMember.user_id);
+
+        // Then insert the new role
+        const { error: roleError } = await supabase
+          .from('user_roles')
+          .insert([{
+            user_id: editingMember.user_id,
+            role: editingMember.role as any
+          }]);
+
+        if (roleError) {
+          console.error('Error updating role:', roleError);
+        }
+      }
+
+      await refetchProfiles();
+      setIsEditDialogOpen(false);
+      setEditingMember(null);
+      
+      toast({
+        title: "Success",
+        description: "Team member updated successfully.",
+      });
+    } catch (error) {
+      console.error('Error updating member:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update team member.",
+        variant: "destructive"
+      });
+    }
   };
 
   if (loading) {
@@ -85,6 +156,7 @@ export default function TeamList() {
                   <th className="text-left py-3 px-4 font-semibold">Name</th>
                   <th className="text-left py-3 px-4 font-semibold">Email</th>
                   <th className="text-right py-3 px-4 font-semibold">Tasks Assigned</th>
+                  <th className="text-right py-3 px-4 font-semibold">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -114,6 +186,18 @@ export default function TeamList() {
                       <td className="py-3 px-4 text-right">
                         <Badge variant="outline">{taskCount}</Badge>
                       </td>
+                      <td className="py-3 px-4 text-right">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            setEditingMember({ ...profile, role: userRole });
+                            setIsEditDialogOpen(true);
+                          }}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      </td>
                     </tr>
                   );
                 })}
@@ -127,6 +211,59 @@ export default function TeamList() {
           )}
         </CardContent>
       </Card>
+
+      {/* Edit Member Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="bg-card/95 backdrop-blur">
+          <DialogHeader>
+            <DialogTitle>Edit Team Member</DialogTitle>
+          </DialogHeader>
+          {editingMember && (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="edit-name">Full Name</Label>
+                <Input
+                  id="edit-name"
+                  value={editingMember.name}
+                  onChange={(e) => setEditingMember({ ...editingMember, name: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-email">Email</Label>
+                <Input
+                  id="edit-email"
+                  type="email"
+                  value={editingMember.email}
+                  onChange={(e) => setEditingMember({ ...editingMember, email: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-role">Role</Label>
+                <select
+                  id="edit-role"
+                  value={editingMember.role || ''}
+                  onChange={(e) => setEditingMember({ ...editingMember, role: e.target.value })}
+                  className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm mt-1"
+                >
+                  <option value="">Select a role</option>
+                  <option value="administrator">Administrator</option>
+                  <option value="project_manager">Project Manager</option>
+                  <option value="dev_lead">Dev Lead/Architect</option>
+                  <option value="developer">Developer</option>
+                  <option value="product_owner">Product Owner</option>
+                  <option value="team_member">Team Member</option>
+                </select>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button onClick={handleEditMember} className="flex-1">Save Changes</Button>
+                <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} className="flex-1">
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

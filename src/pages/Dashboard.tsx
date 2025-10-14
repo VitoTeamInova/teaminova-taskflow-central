@@ -5,6 +5,7 @@ import { Task, TaskStatus } from "@/types/task";
 import { useSupabaseData } from "@/hooks/useSupabaseData";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
+import { ErrorLogViewer } from "@/components/ErrorLogViewer";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -267,6 +268,9 @@ const Dashboard = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Error Log Section */}
+      <ErrorLogViewer />
     </div>
   );
 };
