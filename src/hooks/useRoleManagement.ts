@@ -44,23 +44,36 @@ export function useRoleManagement() {
   const updateUserRole = async (userId: string, newRole: AppRole): Promise<boolean> => {
     setActionLoading(userId);
     try {
-      // First, remove all existing roles for this user
-      const { error: deleteError, status: deleteStatus } = await supabase
+      // Try to update existing role first
+      const { data: existingRoles, error: fetchError } = await supabase
         .from('user_roles')
-        .delete()
-        .eq('user_id', userId);
+        .select('id')
+        .eq('user_id', userId)
+        .limit(1);
 
-      if (deleteError) {
-        throw Object.assign(deleteError, { status: deleteStatus });
+      if (fetchError) {
+        throw fetchError;
       }
 
-      // Then add the new role
-      const { error: insertError, status: insertStatus } = await supabase
-        .from('user_roles')
-        .insert({ user_id: userId, role: newRole });
+      if (existingRoles && existingRoles.length > 0) {
+        // Update existing role
+        const { error: updateError } = await supabase
+          .from('user_roles')
+          .update({ role: newRole })
+          .eq('user_id', userId);
 
-      if (insertError) {
-        throw Object.assign(insertError, { status: insertStatus });
+        if (updateError) {
+          throw updateError;
+        }
+      } else {
+        // Insert new role if none exists
+        const { error: insertError } = await supabase
+          .from('user_roles')
+          .insert({ user_id: userId, role: newRole });
+
+        if (insertError) {
+          throw insertError;
+        }
       }
 
       // Refresh roles for UI
@@ -69,7 +82,7 @@ export function useRoleManagement() {
     } catch (error: any) {
       // Log centrally and surface a helpful message
       errorLogger.logDatabaseError("Error updating user role", error, { userId, newRole });
-      const isForbidden = (error?.status === 403) || (error?.code === 'PGRST301');
+      const isForbidden = (error?.status === 403) || (error?.code === 'PGRST301') || error?.message?.includes('permission');
       toast({
         variant: "destructive",
         title: "Role update failed",
