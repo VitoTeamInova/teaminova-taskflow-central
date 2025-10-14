@@ -473,11 +473,20 @@ const Team = () => {
               </div>
               <div>
                 <Label htmlFor="edit-role">Role</Label>
-                <Input
+                <select
                   id="edit-role"
-                  value={editingMember.role}
+                  value={editingMember.role || ''}
                   onChange={(e) => setEditingMember({ ...editingMember, role: e.target.value })}
-                />
+                  className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm mt-1"
+                >
+                  <option value="">Select a role</option>
+                  <option value="administrator">Administrator</option>
+                  <option value="project_manager">Project Manager</option>
+                  <option value="dev_lead">Dev Lead/Architect</option>
+                  <option value="developer">Developer</option>
+                  <option value="product_owner">Product Owner</option>
+                  <option value="team_member">Team Member</option>
+                </select>
               </div>
               <div>
                 <Label htmlFor="edit-photo">Photo URL</Label>

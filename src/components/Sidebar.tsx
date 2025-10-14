@@ -20,7 +20,6 @@ const getNavigationItems = (taskCount: number, activeTaskCount: number) => [
   { id: 'dashboard', label: 'Dashboard', icon: Home },
   { id: 'calendar', label: 'Calendar', icon: Calendar },
   { id: 'projects', label: 'Projects', icon: FolderOpen },
-  { id: 'reports', label: 'Reports', icon: BarChart3 },
 ];
 
 export function Sidebar({ projects, tasks, profiles, activeView, onViewChange, onCreateProject, onSettingsClick }: SidebarProps) {
@@ -43,17 +42,14 @@ export function Sidebar({ projects, tasks, profiles, activeView, onViewChange, o
     <aside className="w-64 border-r bg-card h-full">
       <div className="p-4 flex flex-col h-full">
         <nav className="space-y-2 flex-1 overflow-y-auto">
-          {navigationItems.map((item) => (
-            <Button
-              key={item.id}
-              variant={activeView === item.id ? "secondary" : "ghost"}
-              className="w-full justify-start h-10"
-              onClick={() => onViewChange(item.id)}
-            >
-              <item.icon className="h-4 w-4 mr-3" />
-              <span className="flex-1 text-left">{item.label}</span>
-            </Button>
-          ))}
+          <Button
+            variant={activeView === 'dashboard' ? "secondary" : "ghost"}
+            className="w-full justify-start h-10"
+            onClick={() => onViewChange('dashboard')}
+          >
+            <Home className="h-4 w-4 mr-3" />
+            <span className="flex-1 text-left">Dashboard</span>
+          </Button>
 
           {/* Tasks Section */}
           <Collapsible open={tasksOpen} onOpenChange={setTasksOpen}>
@@ -113,6 +109,24 @@ export function Sidebar({ projects, tasks, profiles, activeView, onViewChange, o
               </Button>
             </CollapsibleContent>
           </Collapsible>
+
+          <Button
+            variant={activeView === 'calendar' ? "secondary" : "ghost"}
+            className="w-full justify-start h-10"
+            onClick={() => onViewChange('calendar')}
+          >
+            <Calendar className="h-4 w-4 mr-3" />
+            <span className="flex-1 text-left">Calendar</span>
+          </Button>
+
+          <Button
+            variant={activeView === 'projects' ? "secondary" : "ghost"}
+            className="w-full justify-start h-10"
+            onClick={() => onViewChange('projects')}
+          >
+            <FolderOpen className="h-4 w-4 mr-3" />
+            <span className="flex-1 text-left">Projects</span>
+          </Button>
         </nav>
 
         <div className="mt-8">
@@ -124,13 +138,14 @@ export function Sidebar({ projects, tasks, profiles, activeView, onViewChange, o
           
           <div className="space-y-1">
             {projects.map((project) => (
-              <div
+              <button
                 key={project.id}
-                className="w-full flex items-center h-9 text-sm px-3 py-2 text-muted-foreground"
+                onClick={() => onViewChange(`project-${project.id}`)}
+                className="w-full flex items-center h-9 text-sm px-3 py-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded-md transition-colors cursor-pointer"
               >
                 <FolderOpen className="h-4 w-4 mr-3" style={{ color: project.color }} />
                 <span className="truncate">{project.name}</span>
-              </div>
+              </button>
             ))}
           </div>
         </div>

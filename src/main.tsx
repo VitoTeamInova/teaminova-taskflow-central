@@ -7,21 +7,24 @@ import App from './App.tsx';
 import './index.css';
 import { SettingsProvider } from "./contexts/SettingsContext";
 import { AuthProvider } from "./contexts/AuthContext";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 const queryClient = new QueryClient();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <ThemeProvider attribute="class" defaultTheme="light">
-          <SettingsProvider>
-            <AuthProvider>
-              <App />
-            </AuthProvider>
-          </SettingsProvider>
-        </ThemeProvider>
-      </BrowserRouter>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <ThemeProvider attribute="class" defaultTheme="light">
+            <SettingsProvider>
+              <AuthProvider>
+                <App />
+              </AuthProvider>
+            </SettingsProvider>
+          </ThemeProvider>
+        </BrowserRouter>
+      </QueryClientProvider>
+    </ErrorBoundary>
   </StrictMode>
 );

@@ -7,6 +7,7 @@ import Projects from "@/pages/Projects";
 import ProjectDetail from "@/pages/ProjectDetail";
 import TaskList from "@/pages/TaskList";
 import OverdueTasks from "@/pages/OverdueTasks";
+import ProjectTasksView from "@/pages/ProjectTasksView";
 import { Task, TaskStatus } from "@/types/task";
 
 interface ViewRendererProps {
@@ -75,18 +76,16 @@ export function ViewRenderer({
     case 'projects':
       return <Projects />;
     case 'project-detail':
-      return selectedProjectId ? (
-        <ProjectDetail 
-          projectId={selectedProjectId} 
-          onBack={onBackToProjects}
-          projects={projects}
-          profiles={profiles}
+      if (!selectedProjectId) return null;
+      const project = projects.find(p => p.id === selectedProjectId);
+      return (
+        <ProjectTasksView
+          projectId={selectedProjectId}
+          projectName={project?.name || 'Project'}
           tasks={tasks}
-          updateProject={updateProject}
-          deleteProject={deleteProject}
-          deleteTask={deleteTask}
+          onBack={onBackToProjects}
         />
-      ) : null;
+      );
     case 'reports':
       return (
         <div className="h-full flex items-center justify-center">
