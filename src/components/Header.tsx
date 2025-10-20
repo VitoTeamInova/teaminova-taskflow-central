@@ -13,6 +13,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { ChevronDown } from "lucide-react";
 import { Project } from "@/types/task";
 
@@ -28,6 +33,7 @@ export function Header({ onViewChange, onSettingsClick, onCreateProject, project
   const { user, signOut } = useAuth();
   const { tasks } = useSupabaseData();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
 
   const criticalOverdueTasks = useMemo(() => {
     const today = new Date();
@@ -67,108 +73,222 @@ export function Header({ onViewChange, onSettingsClick, onCreateProject, project
               Dashboard
             </Button>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="gap-1">
+            <Popover open={openMenu === 'projects'} onOpenChange={(open) => setOpenMenu(open ? 'projects' : null)}>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  className="gap-1"
+                  onMouseEnter={() => setOpenMenu('projects')}
+                  onMouseLeave={() => setOpenMenu(null)}
+                >
                   Projects
                   <ChevronDown className="h-4 w-4" />
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-[300px]">
-                <DropdownMenuItem
+              </PopoverTrigger>
+              <PopoverContent 
+                align="start" 
+                className="w-[300px] p-2"
+                onMouseEnter={() => setOpenMenu('projects')}
+                onMouseLeave={() => setOpenMenu(null)}
+              >
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start mb-1"
                   onClick={() => {
                     onCreateProject();
                     onViewChange('projects');
+                    setOpenMenu(null);
                   }}
                 >
                   <Plus className="mr-2 h-4 w-4" />
                   Add Project
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
+                </Button>
+                <div className="border-t my-1" />
                 {projects.length > 0 ? (
                   projects.map((project) => (
-                    <DropdownMenuItem
+                    <Button
                       key={project.id}
-                      onClick={() => onViewChange(`project-${project.id}`)}
+                      variant="ghost"
+                      className="w-full justify-start"
+                      onClick={() => {
+                        onViewChange(`project-${project.id}`);
+                        setOpenMenu(null);
+                      }}
                     >
                       {project.name}
-                    </DropdownMenuItem>
+                    </Button>
                   ))
                 ) : (
                   <div className="px-2 py-4 text-sm text-muted-foreground">No projects yet</div>
                 )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+              </PopoverContent>
+            </Popover>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="gap-1">
+            <Popover open={openMenu === 'tasks'} onOpenChange={(open) => setOpenMenu(open ? 'tasks' : null)}>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  className="gap-1"
+                  onMouseEnter={() => setOpenMenu('tasks')}
+                  onMouseLeave={() => setOpenMenu(null)}
+                >
                   Tasks
                   <ChevronDown className="h-4 w-4" />
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-[200px]">
-                <DropdownMenuItem onClick={() => onViewChange('tasks')}>
+              </PopoverTrigger>
+              <PopoverContent 
+                align="start" 
+                className="w-[200px] p-2"
+                onMouseEnter={() => setOpenMenu('tasks')}
+                onMouseLeave={() => setOpenMenu(null)}
+              >
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => {
+                    onViewChange('tasks');
+                    setOpenMenu(null);
+                  }}
+                >
                   Kanban View
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onViewChange('task-list')}>
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => {
+                    onViewChange('task-list');
+                    setOpenMenu(null);
+                  }}
+                >
                   List View
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onViewChange('calendar')}>
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => {
+                    onViewChange('calendar');
+                    setOpenMenu(null);
+                  }}
+                >
                   Calendar
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                </Button>
+              </PopoverContent>
+            </Popover>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="gap-1">
+            <Popover open={openMenu === 'team'} onOpenChange={(open) => setOpenMenu(open ? 'team' : null)}>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  className="gap-1"
+                  onMouseEnter={() => setOpenMenu('team')}
+                  onMouseLeave={() => setOpenMenu(null)}
+                >
                   Team
                   <ChevronDown className="h-4 w-4" />
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-[200px]">
-                <DropdownMenuItem onClick={() => onViewChange('team')}>
+              </PopoverTrigger>
+              <PopoverContent 
+                align="start" 
+                className="w-[200px] p-2"
+                onMouseEnter={() => setOpenMenu('team')}
+                onMouseLeave={() => setOpenMenu(null)}
+              >
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => {
+                    onViewChange('team');
+                    setOpenMenu(null);
+                  }}
+                >
                   Card View
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onViewChange('team-list')}>
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => {
+                    onViewChange('team-list');
+                    setOpenMenu(null);
+                  }}
+                >
                   List View
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                </Button>
+              </PopoverContent>
+            </Popover>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="gap-1">
+            <Popover open={openMenu === 'issues'} onOpenChange={(open) => setOpenMenu(open ? 'issues' : null)}>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  className="gap-1"
+                  onMouseEnter={() => setOpenMenu('issues')}
+                  onMouseLeave={() => setOpenMenu(null)}
+                >
                   Issues
                   <ChevronDown className="h-4 w-4" />
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-[220px]">
-                <DropdownMenuItem
+              </PopoverTrigger>
+              <PopoverContent 
+                align="start" 
+                className="w-[220px] p-2"
+                onMouseEnter={() => setOpenMenu('issues')}
+                onMouseLeave={() => setOpenMenu(null)}
+              >
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start mb-1"
                   onClick={() => {
                     setDialogOpen(true);
                     onViewChange('issues-all');
+                    setOpenMenu(null);
                   }}
                 >
                   <Plus className="mr-2 h-4 w-4" />
                   Add Issue
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => onViewChange('issues-by-project')}>
+                </Button>
+                <div className="border-t my-1" />
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => {
+                    onViewChange('issues-by-project');
+                    setOpenMenu(null);
+                  }}
+                >
                   Issues by Project
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onViewChange('issues-by-severity')}>
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => {
+                    onViewChange('issues-by-severity');
+                    setOpenMenu(null);
+                  }}
+                >
                   Issues by Severity
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onViewChange('issues-by-date')}>
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => {
+                    onViewChange('issues-by-date');
+                    setOpenMenu(null);
+                  }}
+                >
                   Issues by Date
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onViewChange('issues-by-owner')}>
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => {
+                    onViewChange('issues-by-owner');
+                    setOpenMenu(null);
+                  }}
+                >
                   Issues by Owner
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                </Button>
+              </PopoverContent>
+            </Popover>
           </nav>
         </div>
 
