@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Issue, IssueSeverity, IssueStatus, IssueItemType } from "@/types/issue";
 import { Project, TeamMember } from "@/types/task";
+import { toast } from "sonner";
 
 interface IssueDialogProps {
   open: boolean;
@@ -66,7 +67,23 @@ export function IssueDialog({ open, onOpenChange, onSave, issue, projects, teamM
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(formData);
+    
+    if (!formData.projectId) {
+      toast.error("Please select a project");
+      return;
+    }
+    
+    // Convert empty strings to undefined for optional fields
+    const cleanedData = {
+      ...formData,
+      ownerId: formData.ownerId || undefined,
+      targetResolutionDate: formData.targetResolutionDate || undefined,
+      recommendedAction: formData.recommendedAction || undefined,
+      comments: formData.comments || undefined,
+      resolutionNotes: formData.resolutionNotes || undefined,
+    };
+    
+    onSave(cleanedData);
     onOpenChange(false);
   };
 

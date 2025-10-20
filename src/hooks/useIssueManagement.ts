@@ -75,11 +75,11 @@ export function useIssueManagement() {
         item_type: issueData.itemType,
         status: issueData.status || 'open',
         description: issueData.description,
-        owner_id: issueData.ownerId,
-        target_resolution_date: issueData.targetResolutionDate,
-        recommended_action: issueData.recommendedAction,
-        comments: issueData.comments,
-        resolution_notes: issueData.resolutionNotes,
+        owner_id: issueData.ownerId || null,
+        target_resolution_date: issueData.targetResolutionDate || null,
+        recommended_action: issueData.recommendedAction || null,
+        comments: issueData.comments || null,
+        resolution_notes: issueData.resolutionNotes || null,
       });
 
       if (error) throw error;
@@ -103,11 +103,11 @@ export function useIssueManagement() {
           item_type: updates.itemType,
           status: updates.status,
           description: updates.description,
-          owner_id: updates.ownerId,
-          target_resolution_date: updates.targetResolutionDate,
-          recommended_action: updates.recommendedAction,
-          comments: updates.comments,
-          resolution_notes: updates.resolutionNotes,
+          owner_id: updates.ownerId || null,
+          target_resolution_date: updates.targetResolutionDate || null,
+          recommended_action: updates.recommendedAction || null,
+          comments: updates.comments || null,
+          resolution_notes: updates.resolutionNotes || null,
         })
         .eq('id', issueId);
 
