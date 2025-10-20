@@ -53,6 +53,68 @@ export type Database = {
         }
         Relationships: []
       }
+      issues: {
+        Row: {
+          author_id: string
+          comments: string | null
+          created_at: string
+          date_identified: string
+          description: string
+          id: string
+          item_type: Database["public"]["Enums"]["issue_item_type"]
+          owner_id: string | null
+          project_id: string
+          recommended_action: string | null
+          resolution_notes: string | null
+          severity: Database["public"]["Enums"]["issue_severity"]
+          status: Database["public"]["Enums"]["issue_status"]
+          target_resolution_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          comments?: string | null
+          created_at?: string
+          date_identified?: string
+          description: string
+          id?: string
+          item_type: Database["public"]["Enums"]["issue_item_type"]
+          owner_id?: string | null
+          project_id: string
+          recommended_action?: string | null
+          resolution_notes?: string | null
+          severity: Database["public"]["Enums"]["issue_severity"]
+          status?: Database["public"]["Enums"]["issue_status"]
+          target_resolution_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          comments?: string | null
+          created_at?: string
+          date_identified?: string
+          description?: string
+          id?: string
+          item_type?: Database["public"]["Enums"]["issue_item_type"]
+          owner_id?: string | null
+          project_id?: string
+          recommended_action?: string | null
+          resolution_notes?: string | null
+          severity?: Database["public"]["Enums"]["issue_severity"]
+          status?: Database["public"]["Enums"]["issue_status"]
+          target_resolution_date?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "issues_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       milestones: {
         Row: {
           completed: boolean
@@ -376,6 +438,15 @@ export type Database = {
         | "developer"
         | "product_owner"
         | "team_member"
+      issue_item_type:
+        | "issue"
+        | "bug"
+        | "dependency"
+        | "blocker"
+        | "risk"
+        | "other"
+      issue_severity: "critical" | "high" | "medium" | "low"
+      issue_status: "open" | "under_investigation" | "being_worked" | "closed"
       project_status:
         | "planned"
         | "started"
@@ -525,6 +596,16 @@ export const Constants = {
         "product_owner",
         "team_member",
       ],
+      issue_item_type: [
+        "issue",
+        "bug",
+        "dependency",
+        "blocker",
+        "risk",
+        "other",
+      ],
+      issue_severity: ["critical", "high", "medium", "low"],
+      issue_status: ["open", "under_investigation", "being_worked", "closed"],
       project_status: [
         "planned",
         "started",

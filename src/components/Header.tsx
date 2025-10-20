@@ -1,4 +1,5 @@
 import { Bell, User, LogOut, Settings, Plus } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
@@ -32,6 +33,7 @@ interface HeaderProps {
 export function Header({ onViewChange, onSettingsClick, onCreateProject, projects, activeView }: HeaderProps) {
   const { user, signOut } = useAuth();
   const { tasks } = useSupabaseData();
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   const criticalOverdueTasks = useMemo(() => {
     const today = new Date();
@@ -155,6 +157,54 @@ export function Header({ onViewChange, onSettingsClick, onCreateProject, project
                       onClick={() => onViewChange('team-list')}
                     >
                       List View
+                    </Button>
+                  </div>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+
+              <NavigationMenuItem>
+                <NavigationMenuTrigger>Issues</NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <div className="w-[220px] p-2">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start"
+                      onClick={() => {
+                        setDialogOpen(true);
+                        onViewChange('issues-all');
+                      }}
+                    >
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Issue
+                    </Button>
+                    <div className="border-t my-2" />
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start"
+                      onClick={() => onViewChange('issues-by-project')}
+                    >
+                      Issues by Project
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start"
+                      onClick={() => onViewChange('issues-by-severity')}
+                    >
+                      Issues by Severity
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start"
+                      onClick={() => onViewChange('issues-by-date')}
+                    >
+                      Issues by Date
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start"
+                      onClick={() => onViewChange('issues-by-owner')}
+                    >
+                      Issues by Owner
                     </Button>
                   </div>
                 </NavigationMenuContent>

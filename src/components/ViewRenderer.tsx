@@ -8,6 +8,7 @@ import ProjectDetail from "@/pages/ProjectDetail";
 import TaskList from "@/pages/TaskList";
 import OverdueTasks from "@/pages/OverdueTasks";
 import ProjectTasksView from "@/pages/ProjectTasksView";
+import { IssuesView } from "@/pages/IssuesView";
 import { Task, TaskStatus } from "@/types/task";
 
 interface ViewRendererProps {
@@ -94,6 +95,19 @@ export function ViewRenderer({
             <p className="text-muted-foreground">Coming soon...</p>
           </div>
         </div>
+      );
+    case 'issues-all':
+    case 'issues-by-project':
+    case 'issues-by-severity':
+    case 'issues-by-date':
+    case 'issues-by-owner':
+      const issueView = activeView.replace('issues-', '') as 'all' | 'by-project' | 'by-severity' | 'by-date' | 'by-owner';
+      return (
+        <IssuesView
+          view={issueView}
+          projects={projects}
+          teamMembers={profiles}
+        />
       );
     default:
       return null;
