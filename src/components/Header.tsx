@@ -13,13 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu";
+import { ChevronDown } from "lucide-react";
 import { Project } from "@/types/task";
 
 interface HeaderProps {
@@ -64,153 +58,118 @@ export function Header({ onViewChange, onSettingsClick, onCreateProject, project
             </div>
           </div>
 
-          <NavigationMenu>
-            <NavigationMenuList>
-              <NavigationMenuItem>
-                <Button
-                  variant="ghost"
-                  onClick={() => onViewChange('dashboard')}
-                  className={activeView === 'dashboard' ? 'bg-muted' : ''}
-                >
-                  Dashboard
+          <nav className="flex items-center space-x-1">
+            <Button
+              variant="ghost"
+              onClick={() => onViewChange('dashboard')}
+              className={activeView === 'dashboard' ? 'bg-muted' : ''}
+            >
+              Dashboard
+            </Button>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="gap-1">
+                  Projects
+                  <ChevronDown className="h-4 w-4" />
                 </Button>
-              </NavigationMenuItem>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-[300px]">
+                <DropdownMenuItem
+                  onClick={() => {
+                    onCreateProject();
+                    onViewChange('projects');
+                  }}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Project
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                {projects.length > 0 ? (
+                  projects.map((project) => (
+                    <DropdownMenuItem
+                      key={project.id}
+                      onClick={() => onViewChange(`project-${project.id}`)}
+                    >
+                      {project.name}
+                    </DropdownMenuItem>
+                  ))
+                ) : (
+                  <div className="px-2 py-4 text-sm text-muted-foreground">No projects yet</div>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-              <NavigationMenuItem>
-                <NavigationMenuTrigger>Projects</NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <div className="w-[300px] p-2">
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start mb-2"
-                      onClick={() => {
-                        onCreateProject();
-                        onViewChange('projects');
-                      }}
-                    >
-                      <Plus className="mr-2 h-4 w-4" />
-                      Add Project
-                    </Button>
-                    <div className="border-t pt-2">
-                      {projects.length > 0 ? (
-                        projects.map((project) => (
-                          <Button
-                            key={project.id}
-                            variant="ghost"
-                            className="w-full justify-start"
-                            onClick={() => onViewChange(`project-${project.id}`)}
-                          >
-                            {project.name}
-                          </Button>
-                        ))
-                      ) : (
-                        <p className="text-sm text-muted-foreground px-2 py-4">No projects yet</p>
-                      )}
-                    </div>
-                  </div>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="gap-1">
+                  Tasks
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-[200px]">
+                <DropdownMenuItem onClick={() => onViewChange('tasks')}>
+                  Kanban View
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onViewChange('task-list')}>
+                  List View
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onViewChange('calendar')}>
+                  Calendar
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-              <NavigationMenuItem>
-                <NavigationMenuTrigger>Tasks</NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <div className="w-[200px] p-2">
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start"
-                      onClick={() => onViewChange('tasks')}
-                    >
-                      Kanban View
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start"
-                      onClick={() => onViewChange('task-list')}
-                    >
-                      List View
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start"
-                      onClick={() => onViewChange('calendar')}
-                    >
-                      Calendar
-                    </Button>
-                  </div>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="gap-1">
+                  Team
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-[200px]">
+                <DropdownMenuItem onClick={() => onViewChange('team')}>
+                  Card View
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onViewChange('team-list')}>
+                  List View
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-              <NavigationMenuItem>
-                <NavigationMenuTrigger>Team</NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <div className="w-[200px] p-2">
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start"
-                      onClick={() => onViewChange('team')}
-                    >
-                      Card View
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start"
-                      onClick={() => onViewChange('team-list')}
-                    >
-                      List View
-                    </Button>
-                  </div>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
-
-              <NavigationMenuItem>
-                <NavigationMenuTrigger>Issues</NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <div className="w-[220px] p-2">
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start"
-                      onClick={() => {
-                        setDialogOpen(true);
-                        onViewChange('issues-all');
-                      }}
-                    >
-                      <Plus className="mr-2 h-4 w-4" />
-                      Add Issue
-                    </Button>
-                    <div className="border-t my-2" />
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start"
-                      onClick={() => onViewChange('issues-by-project')}
-                    >
-                      Issues by Project
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start"
-                      onClick={() => onViewChange('issues-by-severity')}
-                    >
-                      Issues by Severity
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start"
-                      onClick={() => onViewChange('issues-by-date')}
-                    >
-                      Issues by Date
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start"
-                      onClick={() => onViewChange('issues-by-owner')}
-                    >
-                      Issues by Owner
-                    </Button>
-                  </div>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="gap-1">
+                  Issues
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-[220px]">
+                <DropdownMenuItem
+                  onClick={() => {
+                    setDialogOpen(true);
+                    onViewChange('issues-all');
+                  }}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Issue
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => onViewChange('issues-by-project')}>
+                  Issues by Project
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onViewChange('issues-by-severity')}>
+                  Issues by Severity
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onViewChange('issues-by-date')}>
+                  Issues by Date
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onViewChange('issues-by-owner')}>
+                  Issues by Owner
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </nav>
         </div>
 
         <div className="flex items-center space-x-4">
