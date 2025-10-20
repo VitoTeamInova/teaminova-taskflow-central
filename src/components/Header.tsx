@@ -1,4 +1,4 @@
-import { Bell, User, LogOut, Settings } from "lucide-react";
+import { Bell, User, LogOut, Settings, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
@@ -12,13 +12,24 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
+import { Project } from "@/types/task";
 
 interface HeaderProps {
   onViewChange: (view: string) => void;
   onSettingsClick: () => void;
+  onCreateProject: () => void;
+  projects: Project[];
+  activeView: string;
 }
 
-export function Header({ onViewChange, onSettingsClick }: HeaderProps) {
+export function Header({ onViewChange, onSettingsClick, onCreateProject, projects, activeView }: HeaderProps) {
   const { user, signOut } = useAuth();
   const { tasks } = useSupabaseData();
 
@@ -40,7 +51,7 @@ export function Header({ onViewChange, onSettingsClick }: HeaderProps) {
   return (
     <header className="border-b bg-card">
       <div className="flex h-16 items-center justify-between px-6">
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-8">
           <div className="flex items-center space-x-2">
             <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-primary-hover flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-sm">TI</span>
@@ -50,6 +61,106 @@ export function Header({ onViewChange, onSettingsClick }: HeaderProps) {
               <p className="text-xs text-muted-foreground">Task Management</p>
             </div>
           </div>
+
+          <NavigationMenu>
+            <NavigationMenuList>
+              <NavigationMenuItem>
+                <Button
+                  variant="ghost"
+                  onClick={() => onViewChange('dashboard')}
+                  className={activeView === 'dashboard' ? 'bg-muted' : ''}
+                >
+                  Dashboard
+                </Button>
+              </NavigationMenuItem>
+
+              <NavigationMenuItem>
+                <NavigationMenuTrigger>Projects</NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <div className="w-[300px] p-2">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start mb-2"
+                      onClick={() => {
+                        onCreateProject();
+                        onViewChange('projects');
+                      }}
+                    >
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Project
+                    </Button>
+                    <div className="border-t pt-2">
+                      {projects.length > 0 ? (
+                        projects.map((project) => (
+                          <Button
+                            key={project.id}
+                            variant="ghost"
+                            className="w-full justify-start"
+                            onClick={() => onViewChange(`project-${project.id}`)}
+                          >
+                            {project.name}
+                          </Button>
+                        ))
+                      ) : (
+                        <p className="text-sm text-muted-foreground px-2 py-4">No projects yet</p>
+                      )}
+                    </div>
+                  </div>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+
+              <NavigationMenuItem>
+                <NavigationMenuTrigger>Tasks</NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <div className="w-[200px] p-2">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start"
+                      onClick={() => onViewChange('tasks')}
+                    >
+                      Kanban View
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start"
+                      onClick={() => onViewChange('task-list')}
+                    >
+                      List View
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start"
+                      onClick={() => onViewChange('calendar')}
+                    >
+                      Calendar
+                    </Button>
+                  </div>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+
+              <NavigationMenuItem>
+                <NavigationMenuTrigger>Team</NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <div className="w-[200px] p-2">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start"
+                      onClick={() => onViewChange('team')}
+                    >
+                      Card View
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start"
+                      onClick={() => onViewChange('team-list')}
+                    >
+                      List View
+                    </Button>
+                  </div>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
         </div>
 
         <div className="flex items-center space-x-4">
